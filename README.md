@@ -1,1 +1,1 @@
-# fixed-floating-point-adder-multiplier
+# Adder Multiplier Hardware for Fixed Point and Floating Point Format
