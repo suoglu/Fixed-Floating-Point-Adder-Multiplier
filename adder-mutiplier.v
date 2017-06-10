@@ -2,16 +2,16 @@
 // This file contains modules for addition and multipication of 16 bit unsigned
 // fixed point and signed floating point formated numbers
 /*
-  Fixed Point Format:
-    Most significant 8 bits represent integer part and Least significant 8 bits
-    represent fraction part
-    i.e. IIIIIIIIFFFFFFFF = IIIIIIII.FFFFFFFF
-  ----------------------------------------------------------------------------
-  Floating Point Format:
-    binary16 (IEEE 754-2008) is used. MSB used as sign bit. 10 least significant
-    bits are used as fraction and remaining bits are used as exponent
-    i.e. SEEEEEFFFFFFFFFF = (-1)^S * 1.FFFFFFFFFF * 2^EEEEE
-*/
+ * Fixed Point Format:
+ *   Most significant 8 bits represent integer part and Least significant 8 bits
+ *   represent fraction part
+ *   i.e. IIIIIIIIFFFFFFFF = IIIIIIII.FFFFFFFF
+ * ----------------------------------------------------------------------------
+ * Floating Point Format:
+ *   binary16 (IEEE 754-2008) is used. MSB used as sign bit. 10 least significant
+ *   bits are used as fraction and remaining bits are used as exponent
+ *   i.e. SEEEEEFFFFFFFFFF = (-1)^S * 1.FFFFFFFFFF * 2^EEEEE
+ */
 
 //fixed adder adds unsigned fixed numbers. Overflow flag is high in case of overflow
 module fixed_adder(num1, num2, result, overflow);
@@ -62,5 +62,54 @@ module fixed_multi(num1, num2, result, overflow);
       mid[14] = (num1 << 6) & {16{num2[14]}};
       mid[15] = (num1 << 7) & {16{num2[15]}};
     end
+
+endmodule
+
+//float multi multiplies floating point numbers. Overflow flag is high in case of overflow
+module float_multi(num1, num2, result, overflow);
+  input [15:0] num1, num2;
+  output reg [15:0] result;
+  output overflow;
+  wire sign1, sign2, signr; //hold signs
+  wire [4:0] ex1, ex2; //hold exponents
+  wire [9:0] fra1, fra2; //hold fractions
+  wire [11:0] float1; // true value of fra1 i.e. 1.ffffffffff
+  wire [5:0] exSum, exFinalSum; //exponent sums
+  reg [11:0] float_res; //fraction result
+
+  assign overflow = exFinalSum[5]; //extra digit of final sum exist at overflow
+  //decode numbers
+  assign {sign1, ex1, fra1} = num1;
+  assign {sign2, ex2, fra2} = num2;
+  //Same signs give 0 (positive), different signs give 1 (negative)
+  assign signr = (sign1 ^ sign2);
+  assign exSum = (ex1 + ex2); //exponentials are added
+  assign float1 = {2'b01, fra1};
+
+
+
+
+  always@* //Results
+    begin
+       result[15] = signr;
+       result[14:10] = exFinalSum[4:0];
+
+       //Both casex and if-else statements does same thing
+       /*casex(float_res)
+ 				12'b01??????????: result[9:0] = float_res[9:0];
+ 				default:   result[9:0] = float_res[10:1];
+ 			endcase*/
+      if(float_res[11] == 1) //12'b1???????????
+        begin
+          result[9:0] = float_res[10:1];
+        end
+      else //12'b01??????????
+        begin
+           result[9:0] = float_res[9:0];
+        end
+    end
+
+
+
 
 endmodule
