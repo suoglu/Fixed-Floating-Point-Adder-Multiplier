@@ -68,28 +68,26 @@ endmodule
 //float multi multiplies floating point numbers. Overflow flag is high in case of overflow
 module float_multi(num1, num2, result, overflow);
   input [15:0] num1, num2;
-  output reg [15:0] result;
+  output [15:0] result;
   output overflow;
   wire sign1, sign2, signr; //hold signs
   wire [4:0] ex1, ex2; //hold exponents
   wire [9:0] fra1, fra2; //hold fractions
-  wire [11:0] float1; // true value of fra1 i.e. 1.ffffffffff
-  wire [5:0] exSum, exFinalSum; //exponent sums
-  wire [11:0] float_res; //fraction result
-  reg [11:0] mid[9:0], mid2[1:0];
+  wire [10:0] float1; // true value of fra1 i.e. 1.ffffffffff
+  wire [5:0] exSum; //exponent sum
+  wire [10:0] float_res; //fraction result
+  reg [10:0] mid[9:0], mid2[1:0];
 
-  assign overflow = exFinalSum[5]; //extra digit of final sum exist at overflow
+  assign overflow = exSum[5]; //extra digit of final sum exist at overflow
   //decode numbers
   assign {sign1, ex1, fra1} = num1;
   assign {sign2, ex2, fra2} = num2;
   //Same signs give 0 (positive), different signs give 1 (negative)
   assign signr = (sign1 ^ sign2);
   assign exSum = (ex1 + ex2); //exponentials are added
-  assign float1 = {2'b01, fra1};
-  assign float_res = float1 + mid2[1] + mid2[0]; //add mid2 terms and integer
-                                                // of num2
-  //if multipication of fractions cause shift
-  assign exFinalSum = (float_res[11] == 1) ? (exSum + 6'b1) : exSum;
+  assign float1 = {1'b1, fra1};
+  assign float_res = float1 + mid2[1] + mid2[0]; //add mid2 terms and integer  of num2
+  assign result = {signr, exSum[4:0], float_res[9:0]};
 
   always@* //create mids from fractions
     begin
@@ -110,27 +108,6 @@ module float_multi(num1, num2, result, overflow);
       mid2[1] = mid[0] + mid[1] + mid[2] + mid[3] + mid[4];
       mid2[0] = mid[5] + mid[6] + mid[7] + mid[8] + mid[9];
     end
-
-  always@* //Results
-    begin
-       result[15] = signr;
-       result[14:10] = exFinalSum[4:0];
-       //Both casex and if-else statements does same thing
-       /*casex(float_res)
- 				12'b01??????????: result[9:0] = float_res[9:0];
- 				default:   result[9:0] = float_res[10:1];
- 			endcase*/
-      if(float_res[11] == 1) //12'b1???????????
-        begin
-          result[9:0] = float_res[10:1];
-        end
-      else //12'b01??????????
-        begin
-           result[9:0] = float_res[9:0];
-        end
-    end
-
-
 
 
 endmodule
