@@ -109,5 +109,93 @@ module float_multi(num1, num2, result, overflow);
       mid2[0] = mid[5] + mid[6] + mid[7] + mid[8] + mid[9];
     end
 
+endmodule
+
+//float multi multiplies floating point numbers. Overflow flag is high in case of overflow
+module float_adder(num1, num2, result, overflow);
+  input [15:0] num1, num2;
+  output [15:0] result;
+  output overflow; //overflow flag
+  reg [15:0] bigNum, smallNum; //to seperate big and small numbers
+  wire [9:0] big_fra, small_fra; //to hold fraction part
+  wire [4:0] big_ex, small_ex; //to hold exponent part
+  wire [5:0] exCheck;
+  wire big_sig, small_sig; //to hold signs
+  wire [10:0] big_float, small_float; //to hold as float number with integer
+  reg [10:0] sign_small_float, shifted_small_float; //preparing small float
+  wire ex_diff; //difrence between exponentials
+  wire [11:0] sum; //sum of numbers with integer parts
+
+  assign result[15] = big_sig; //result sign same as big sign
+  assign result[14:10] = exCheck[4:0]; //get result exponent from exCheck
+  assign result[9:0] = (sum[11]) ? sum[10:1] : sum[9:0];
+
+  //decode numbers
+  assign {big_sig, big_ex, big_fra} = bigNum;
+  assign {small_sig, small_ex, small_fra} = smallNum;
+  //add integer parts
+  assign big_float = {1'b1, big_fra};
+  assign small_float = {1'b1, small_fra};
+  assign ex_diff = big_ex - small_ex; //diffrence between exponents
+  assign sum = sign_small_float + big_float; //add numbers
+  //increase exponent if sum is shifted
+  assign exCheck = (sum[11]) ? (big_ex + 5'b1) : big_ex;
+
+  always@* //take small number to exponent of big number
+    begin
+      case (ex_diff)
+        0: shifted_small_float = small_float;
+        1: shifted_small_float = (small_float >> 1);
+        2: shifted_small_float = (small_float >> 2);
+        3: shifted_small_float = (small_float >> 3);
+        4: shifted_small_float = (small_float >> 4);
+        5: shifted_small_float = (small_float >> 5);
+        6: shifted_small_float = (small_float >> 6);
+        7: shifted_small_float = (small_float >> 7);
+        8: shifted_small_float = (small_float >> 8);
+        9: shifted_small_float = (small_float >> 9);
+        10: shifted_small_float = (small_float >> 10);
+        default: shifted_small_float = 11'b0;
+      endcase
+    end
+
+  always@* //if signs are diffrent take 2s compliment of small number
+    begin
+      if(big_sig != small_ex)
+        begin
+          sign_small_float = ~shifted_small_float + 11'b1;
+        end
+      else
+        begin
+          sign_small_float = shifted_small_float;
+        end
+    end
+
+  always@* //determine big number
+    begin
+      if(num2[14:10] > num1[14:10])
+        begin
+          bigNum = num2;
+          smallNum = num1;
+        end
+      else if(num2[14:10] == num1[14:10])
+        begin
+          if(num2[9:0] > num1[9:0])
+            begin
+              bigNum = num2;
+              smallNum = num1;
+            end
+          else
+            begin
+              bigNum = num1;
+              smallNum = num2;
+            end
+        end
+      else
+        begin
+          bigNum = num1;
+          smallNum = num2;
+        end
+    end
 
 endmodule
