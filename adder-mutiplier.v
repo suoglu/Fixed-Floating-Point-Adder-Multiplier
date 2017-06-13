@@ -13,6 +13,8 @@
  *   i.e. SEEEEEFFFFFFFFFF = (-1)^S * 1.FFFFFFFFFF * 2^EEEEE
  */
 
+`timescale 1ns / 1ps
+
 //fixed adder adds unsigned fixed numbers. Overflow flag is high in case of overflow
 module fixed_adder(num1, num2, result, overflow);
   input [15:0] num1, num2;
