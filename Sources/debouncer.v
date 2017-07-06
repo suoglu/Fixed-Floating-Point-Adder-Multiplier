@@ -1,5 +1,5 @@
 //Yigit Suoglu
-//Contains debouncer for buttons
+//Contains debouncer module for buttons
 
 module debouncer(clk, rst, in_n, out_c);
   input clk, rst, in_n;
@@ -20,5 +20,6 @@ module debouncer(clk, rst, in_n, out_c);
           out_c <= (~mid[2]) & mid[1];
         end
     end
+
 
 endmodule // debouncer
