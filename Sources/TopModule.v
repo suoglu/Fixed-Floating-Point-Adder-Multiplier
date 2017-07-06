@@ -26,7 +26,7 @@ module FixedFloatingAddMulti(clk, rst, sw, leds, FlA_d, FlM_d, FiA_d, FiM_d,
   wire commonBTN; //senstive to all buttons (except rst)
   wire of_FlA, of_FlM, of_FiA, of_FiM; //overflow signals for operations
   wire ssdEnable; //enables decoders
-/*
+
   //Modules Start
   //operators
   fixed_adder fiA(.num1(num1), .num2(num2), .result(result_fiA), .overflow(of_FiA));
@@ -56,7 +56,7 @@ module FixedFloatingAddMulti(clk, rst, sw, leds, FlA_d, FlM_d, FiA_d, FiM_d,
   debouncer db2(clk, rst, FiA_d, FiA);
   debouncer db3(clk, rst, FiM_d, FiM);
   //Modules End
-*/
+
   assign ssdEnable = &state; //ssd's enabled when state is RESULT
   assign commonBTN = FlA | FlM | FiA | FiM;
   assign leds[1:0] = state; //least significant two bits of leds show state
