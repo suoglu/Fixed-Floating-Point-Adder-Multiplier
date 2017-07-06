@@ -25,6 +25,7 @@ module FixedFloatingAddMulti(clk, rst, sw, leds, FlA_d, FlM_d, FiA_d, FiM_d,
   wire FlA, FlM, FiA, FiM; //Fi: fixed, Fl: floating, A: add, M: multiply (debounced)
   wire commonBTN; //senstive to all buttons (except rst)
   wire of_FlA, of_FlM, of_FiA, of_FiM; //overflow signals for operations
+  wire ssdEnable; //enables decoders
 /*
   //Modules Start
   //operators
@@ -34,10 +35,10 @@ module FixedFloatingAddMulti(clk, rst, sw, leds, FlA_d, FlM_d, FiA_d, FiM_d,
   float_adder flA(.num1(num1), .num2(num2), .result(result_flA), .overflow(of_FlA));
 
   //seven segment display decoders
-  ssdDecode ssd_0(result[3:0], abcdefg0);
-  ssdDecode ssd_1(result[7:4], abcdefg1);
-  ssdDecode ssd_2(result[11:8], abcdefg2);
-  ssdDecode ssd_3(result[15:12], abcdefg3);
+  ssdDecode ssd_0(result[3:0], abcdefg0, ssdEnable);
+  ssdDecode ssd_1(result[7:4], abcdefg1, ssdEnable);
+  ssdDecode ssd_2(result[11:8], abcdefg2, ssdEnable);
+  ssdDecode ssd_3(result[15:12], abcdefg3, ssdEnable);
 
   //seven segment display controller
   ssd_cntr ssdController(clk, rst, abcdefg0[6],abcdefg1[6],abcdefg2[6],abcdefg3[6],
@@ -48,10 +49,18 @@ module FixedFloatingAddMulti(clk, rst, sw, leds, FlA_d, FlM_d, FiA_d, FiM_d,
   abcdefg0[1], abcdefg1[1], abcdefg2[1], abcdefg3[1],
   abcdefg0[0], abcdefg1[0], abcdefg2[0], abcdefg3[0],
   a,b,c,d,e,f,g,an0,an1,an2,an3);
+
+  //debouncers
+  debouncer db0(clk, rst, FlA_d, FlA);
+  debouncer db1(clk, rst, FlM_d, FlM);
+  debouncer db2(clk, rst, FiA_d, FiA);
+  debouncer db3(clk, rst, FiM_d, FiM);
   //Modules End
 */
+  assign ssdEnable = &state; //ssd's enabled when state is RESULT
   assign commonBTN = FlA | FlM | FiA | FiM;
   assign leds[1:0] = state; //least significant two bits of leds show state
+  assign leds[14:2] = 0;
   assign leds[15] = overflow; //Most significant bit of leds show overflow
 
   //state transactions
@@ -67,22 +76,22 @@ module FixedFloatingAddMulti(clk, rst, sw, leds, FlA_d, FlM_d, FiA_d, FiM_d,
   always@*
     begin
       case (op)
-        2'b00:
+        Floating_Add:
           begin
             result = result_flA;
             overflow = of_FlA;
           end
-        2'b01:
+        Floating_Mult:
           begin
             result = result_flM;
             overflow = of_FlM;
           end
-        2'b10:
+        Fixed_Add:
           begin
             result = result_fiA;
             overflow = of_FiA;
           end
-        2'b11:
+        Fixed_Mult:
           begin
             result = result_fiM;
             overflow = of_FiM;
@@ -97,5 +106,21 @@ module FixedFloatingAddMulti(clk, rst, sw, leds, FlA_d, FlM_d, FiA_d, FiM_d,
         op <= {(FiA | FiM), (FiM | FlM)};
     end
 
+  //get numbers
+  always@(posedge clk or posedge rst)
+    begin
+      if(rst)
+        begin
+          num1 <= 16'b0;
+          num2 <= 16'b0;
+        end
+      else
+        case(state)
+          WAIT1: num1 <= sw;
+          WAIT2: num1 <= sw;
+        endcase
+
+
+    end
 
 endmodule
