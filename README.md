@@ -37,3 +37,5 @@ This project was originated from a laboratory assigment and rewritten with [Xili
     * `Floating Point Format`: binary16 (IEEE 754-2008) is used. MSB used as sign bit. 10 least significant bits are used as fraction and remaining bits are used as exponent.  i.e. SEEEEEFFFFFFFFFF = (-1)^S \* 1.FFFFFFFFFF \* 2^EEEEE
   * Output is provided in same format as operands
 
+### Simulation
+Designed system was successfully simulated using [`operatorCore_sim.v`](https://github.com/suoglu/Fixed-Floating-Point-Adder-Multiplier/blob/master/Simulation/operatorCore_sim.v) file, which is included in the repository. [`operatorCore_sim.v`](https://github.com/suoglu/Fixed-Floating-Point-Adder-Multiplier/blob/master/Simulation/operatorCore_sim.v) file contains 4 test cases. Note that simulation code does not simulate top module, but calculation modules. 
