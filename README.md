@@ -30,8 +30,7 @@ This project was originated from a laboratory assigment and rewritten with [Xili
     4. RESULT: Results is show, operation can be changed for provided numbers
   * `Seven Segment Displays`: Shows operation result in hexadecimal format
  
- * **System description:**
+* **System description:**
   * This project provides a 16 bit adder multiplier hardware and interface for testing designed hardware
   * System works on to number formats:
-    * Fixed Point Format: Most significant 8 bits represent integer part and Least significant 8 bits represent fraction part
-    i.e. IIIIIIIIFFFFFFFF = IIIIIIII.FFFFFFFF
+    * Fixed Point Format: Most significant 8 bits represent integer part and Least significant 8 bits represent fraction part.  i.e. IIIIIIIIFFFFFFFF = IIIIIIII.FFFFFFFF
