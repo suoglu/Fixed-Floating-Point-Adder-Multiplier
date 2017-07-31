@@ -24,13 +24,13 @@ This project was originated from a laboratory assigment and rewritten with [Xili
 * **Outputs:**
   * `Overflow LED (Leftmost LED)`: Indicated overflow during operation
   * `State LEDs (Rightmost two LEDs)`: Shows machine state, States follow as:
-    1. IDLE: System does nothing, waits user
-    2. WAIT1: System stores operand 1
-    3. WAIT2: System stores operand 2
-    4. RESULT: Results is show, operation can be changed for provided numbers
+    1. `IDLE`: System does nothing, waits user
+    2. `WAIT1`: System stores operand 1
+    3. `WAIT2`: System stores operand 2
+    4. `RESULT`: Results is show, operation can be changed for provided numbers
   * `Seven Segment Displays`: Shows operation result in hexadecimal format
  
 * **System description:**
   * This project provides a 16 bit adder multiplier hardware and interface for testing designed hardware
   * System works on to number formats:
-    * Fixed Point Format: Most significant 8 bits represent integer part and Least significant 8 bits represent fraction part.  i.e. IIIIIIIIFFFFFFFF = IIIIIIII.FFFFFFFF
+    * Fixed Point Format: Most significant 8 bits represent integer part and Least significant 8 bits represent fraction part.  i.e. IIIIIIIIFFFFFFFF = IIIIIIII.FFFFFFFF
