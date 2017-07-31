@@ -2,18 +2,19 @@
 //Contains top module of implementation
 `timescale 1ns / 1ps
 
-module FixedFloatingAddMulti(clk, rst, sw, leds, FlA_d, FlM_d, FiA_d, FiM_d,
-                                  a, b, c, d, e, f, g, an0, an1, an2, an3);
+module FixedFloatingAddMulti(clk, rst, sw, leds, btnU, btnL, btnR, btnD,seg, an0, an1, an2, an3);
   parameter IDLE = 2'b0, WAIT1 = 2'b1, WAIT2 = 2'b10, RESULT = 2'b11;
   parameter Floating_Add = 2'b0;
   parameter Floating_Mult = 2'b1;
   parameter Fixed_Add = 2'b10;
   parameter Fixed_Mult = 2'b11;
   input [15:0] sw;
-  input FlA_d, FlM_d, FiA_d, FiM_d; //Fi: fixed, Fl: floating, A: add, M: multiply
+  input btnU, btnL, btnR, btnD;
+  wire FlAd, FlMd, FiAd, FiMd; //Fi: fixed, Fl: floating, A: add, M: multiply
   input clk, rst;
   output [15:0] leds;
-  output a, b, c, d, e, f, g; //SSD cathodes
+  wire a, b, c, d, e, f, g; //SSD cathodes
+  output [6:0] seg;
   output an0, an1, an2, an3; //SSD anodes
 
   wire [6:0] abcdefg1, abcdefg2, abcdefg3, abcdefg0;
@@ -26,7 +27,12 @@ module FixedFloatingAddMulti(clk, rst, sw, leds, FlA_d, FlM_d, FiA_d, FiM_d,
   wire commonBTN; //senstive to all buttons (except rst)
   wire of_FlA, of_FlM, of_FiA, of_FiM; //overflow signals for operations
   wire ssdEnable; //enables decoders
-
+  
+  assign seg = {g,f,e,d,c,b,a};
+  assign FlAd = btnU; //Up ~ Float Add
+  assign FlMd = btnL; //Left ~ Float Multi
+  assign FiAd = btnD; //Down ~ Fixed Add 
+  assign FiMd = btnR; //Right ~ Fixed Multi
   //Modules Start
   //operators
   fixed_adder fiA(.num1(num1), .num2(num2), .result(result_fiA), .overflow(of_FiA));
@@ -51,10 +57,10 @@ module FixedFloatingAddMulti(clk, rst, sw, leds, FlA_d, FlM_d, FiA_d, FiM_d,
   a,b,c,d,e,f,g,an0,an1,an2,an3);
 
   //debouncers
-  debouncer db0(clk, rst, FlA_d, FlA);
-  debouncer db1(clk, rst, FlM_d, FlM);
-  debouncer db2(clk, rst, FiA_d, FiA);
-  debouncer db3(clk, rst, FiM_d, FiM);
+  debouncer db0(clk, rst, FlAd, FlA);
+  debouncer db1(clk, rst, FlMd, FlM);
+  debouncer db2(clk, rst, FiAd, FiA);
+  debouncer db3(clk, rst, FiMd, FiM);
   //Modules End
 
   assign ssdEnable = &state; //ssd's enabled when state is RESULT
@@ -102,7 +108,7 @@ module FixedFloatingAddMulti(clk, rst, sw, leds, FlA_d, FlM_d, FiA_d, FiM_d,
   //logic for getting operation
   always@(posedge clk)
     begin
-      if(state[1])
+      if(state[1] & commonBTN)
         op <= {(FiA | FiM), (FiM | FlM)};
     end
 
@@ -117,7 +123,7 @@ module FixedFloatingAddMulti(clk, rst, sw, leds, FlA_d, FlM_d, FiA_d, FiM_d,
       else
         case(state)
           WAIT1: num1 <= sw;
-          WAIT2: num1 <= sw;
+          WAIT2: num2 <= sw;
         endcase
 
 

@@ -43,7 +43,7 @@ module ssdDecode(in, abcdefg, en);
           4'b1111: abcdefg = F;
         endcase
       else
-        abcdefg <= 7'b0; 
+        abcdefg <= 7'b1111111; 
     end
 
 endmodule // ssdDecode
@@ -80,7 +80,7 @@ f0,f1,f2,f3,g0,g1,g2,g3,a,b,c,d,e,f,g,an0,an1,an2,an3);
       if(rst)
         counter <= 16'b0;
       else
-        counter <= state + 16'b1;
+        counter <= counter + 16'b1;
     end
 
   //abcdefg and anode routing

@@ -125,9 +125,10 @@ module float_adder(num1, num2, result, overflow);
   wire big_sig, small_sig; //to hold signs
   wire [10:0] big_float, small_float; //to hold as float number with integer
   reg [10:0] sign_small_float, shifted_small_float; //preparing small float
-  wire ex_diff; //difrence between exponentials
+  wire [3:0] ex_diff; //difrence between exponentials
   wire [11:0] sum; //sum of numbers with integer parts
-
+  
+  assign overflow = (big_sig & small_sig) & ((&big_ex) & (&small_ex)) & sum[11]; //not optimesed
   assign result[15] = big_sig; //result sign same as big sign
   assign result[14:10] = exCheck[4:0]; //get result exponent from exCheck
   assign result[9:0] = (sum[11]) ? sum[10:1] : sum[9:0];
