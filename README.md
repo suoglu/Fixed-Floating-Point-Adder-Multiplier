@@ -34,6 +34,6 @@ This project was originated from a laboratory assigment and rewritten with [Xili
   * This project provides a 16 bit adder multiplier hardware and interface for testing designed hardware
   * System works on to number formats:
     * `Fixed Point Format`: Most significant 8 bits represent integer part and Least significant 8 bits represent fraction part.  i.e. IIIIIIIIFFFFFFFF = IIIIIIII.FFFFFFFF
-    * `Floating Point Format`: binary16 (IEEE 754-2008) is used. MSB used as sign bit. 10 least significant bits are used as fraction and remaining bits are used as exponent.  i.e. SEEEEEFFFFFFFFFF = (-1)^S \* 1.FFFFFFFFFF \* 2^EEEEE
-  *
+    * `Floating Point Format`: binary16 (IEEE 754-2008) is used. MSB used as sign bit. 10 least significant bits are used as fraction and remaining bits are used as exponent.  i.e. SEEEEEFFFFFFFFFF = (-1)^S \* 1.FFFFFFFFFF \* 2^EEEEE
+  * Output is provided in same format as operands
 
