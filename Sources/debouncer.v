@@ -17,7 +17,7 @@ module debouncer(clk, rst, in_n, out_c);
       else
         begin
           mid <= {mid[1:0], in_n};
-          out_c <= (~mid[2]) & mid[1];
+          out_c <= (~mid[2]) & mid[1]; //rising edge
         end
     end
 
