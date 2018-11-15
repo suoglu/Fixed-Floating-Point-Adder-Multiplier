@@ -17,8 +17,8 @@ This project was originated from a laboratory assignment and rewritten with [Xil
   * `Reset button (Center button)`: Used to reset system
   * `Operator buttons`: Used select operator, legend follows as:
     * `Up button`: Floating Format Addition
-    * `Left button`: Floating Format Multiplication 
-    * `Down button`: Fixed Format Addition
+    * `Left button`: Floating Format Multiplication
+    * `Down button`: Fixed Format Addition
     * `Right button`: Fixed Format Multiplication
 
 * **Outputs:**
