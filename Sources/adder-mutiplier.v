@@ -68,6 +68,7 @@ module fixed_multi(num1, num2, result, overflow);
 endmodule
 
 //float multi multiplies floating point numbers. Overflow flag is high in case of overflow
+//FIX: multiplication of fractions can increase exponent (e.g. 1.8 * 1.6)
 module float_multi(num1, num2, result, overflow);
   input [15:0] num1, num2;
   output [15:0] result;

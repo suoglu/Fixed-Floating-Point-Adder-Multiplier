@@ -43,3 +43,9 @@ This project was originated from a laboratory assignment and rewritten with [Xil
 
 Designed system was successfully simulated using [`operatorCore_sim.v`](https://github.com/suoglu/Fixed-Floating-Point-Adder-Multiplier/blob/master/Simulation/operatorCore_sim.v) file, which is included in the repository. [`operatorCore_sim.v`](https://github.com/suoglu/Fixed-Floating-Point-Adder-Multiplier/blob/master/Simulation/operatorCore_sim.v) file contains 4 test cases. Note that simulation code does not simulate a top module, but the calculation modules.
  
+---
+### Issues
+
+`float_multi` module does not work properly when the result of multiplication of two fractions is larger than 2. 
+
+`float_adder` module should be verifed further.
