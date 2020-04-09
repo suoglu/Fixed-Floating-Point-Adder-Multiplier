@@ -80,5 +80,9 @@ module operatorCore_sim();
             $dumpvars(20, floM_sign);
             $dumpvars(21, floM_exp);
             $dumpvars(22, floM_frac);
+            $dumpvars(23, fixA_int);
+            $dumpvars(24, fixA_flo);
+            $dumpvars(25, fixM_int);
+            $dumpvars(26, fixM_flo);
         end
 endmodule
