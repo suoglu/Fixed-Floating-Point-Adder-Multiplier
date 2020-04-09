@@ -5,8 +5,7 @@
  2. Outputs
  3. System description
 2. Simulation
-3. Implementation
-4. Extra Notes
+3. Issues
 
 ---
 ### About
@@ -37,9 +36,10 @@ This project was originated from a laboratory assignment and rewritten with [Xil
     * `Floating Point Format`: binary16 (IEEE 754-2008) is used. MSB is used as sign bit. 10 least significant bits are used as fraction and remaining bits are used as exponent.  i.e. SEEEEEFFFFFFFFFF = (-1)^S \* 1.FFFFFFFFFF \* 2^EEEEE
   * Output is provided in the same format as operands
 
+---
 ### Simulation
 
-!!!There were some typos on last two cases, which are fixed now. To verify those cases another simulation is required!!!
+!!!There are some issues check below!!!
 
-Designed system was successfully simulated using [`operatorCore_sim.v`](https://github.com/suoglu/Fixed-Floating-Point-Adder-Multiplier/blob/master/Simulation/operatorCore_sim.v) file (first two cases are still valid), which is included in the repository. [`operatorCore_sim.v`](https://github.com/suoglu/Fixed-Floating-Point-Adder-Multiplier/blob/master/Simulation/operatorCore_sim.v) file contains 4 test cases. Note that simulation code does not simulate a top module, but the calculation modules.
+Designed system was successfully simulated using [`operatorCore_sim.v`](https://github.com/suoglu/Fixed-Floating-Point-Adder-Multiplier/blob/master/Simulation/operatorCore_sim.v) file, which is included in the repository. [`operatorCore_sim.v`](https://github.com/suoglu/Fixed-Floating-Point-Adder-Multiplier/blob/master/Simulation/operatorCore_sim.v) file contains 4 test cases. Note that simulation code does not simulate a top module, but the calculation modules.
  
