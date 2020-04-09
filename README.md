@@ -2,9 +2,6 @@
 ### Contents of Readme
 
 1. About
-  * Inputs
-  * Outputs
-  * System description
 2. Simulation
 3. Issues
 
