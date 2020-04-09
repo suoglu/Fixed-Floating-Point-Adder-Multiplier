@@ -1,9 +1,9 @@
 # 16-bit Adder Multiplier Hardware for Fixed Point and Floating Point Format (binary16)
 ### Contents of Readme
 1. About
- 1. Inputs
- 2. Outputs
- 3. System description
+  1. Inputs
+  2. Outputs
+  3. System description
 2. Simulation
 3. Issues
 
