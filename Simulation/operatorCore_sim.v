@@ -18,11 +18,25 @@ module operatorCore_sim();
     reg [15:0] num1, num2;
     wire [15:0] floA, floM, fixA, fixM;
     wire [3:0] overflow;
+    wire [7:0] num1_int, num1_flo, num2_int, num2_flo, fixA_int, fixA_flo, fixM_int, fixM_flo;
+    wire num1_sign, num2_sign, floM_sign, floA_sign;
+    wire [4:0] num1_exp, num2_exp, floM_exp, floA_exp;
+    wire [9:0] num1_frac, num2_frac, floM_frac, floA_frac;
     
     fixed_adder uut0(num1, num2, fixA, overflow[0]);
     fixed_multi uut1(num1, num2, fixM, overflow[1]);
     float_multi uut2(num1, num2, floM, overflow[2]);
     float_adder uut3(num1, num2, floA, overflow[3]);
+
+    assign {num1_int, num1_flo} = num1;
+    assign {num2_int, num2_flo} = num2;
+    assign {fixA_int, fixA_flo} = fixA;
+    assign {fixM_int, fixM_flo} = fixM;
+    assign {num1_sign, num1_exp, num1_frac} = num1;
+    assign {num2_sign, num2_exp, num2_frac} = num2;
+    assign {floM_sign, floM_exp, floM_frac} = floM;
+    assign {floA_sign, floA_exp, floA_frac} = floA;
+    
     
     initial //test cases here
         begin
@@ -37,5 +51,5 @@ module operatorCore_sim();
            #250
            num1 <= 16'b1111110110111010;
            num2 <= 16'b0100111001001111;
-        end   
+        end
 endmodule
