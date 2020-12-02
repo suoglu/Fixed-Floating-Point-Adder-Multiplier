@@ -39,7 +39,7 @@ This project was originated from a laboratory assignment and rewritten with [Xil
 
 !!!There are some issues, check below!!!
 
-Designed system was successfully simulated using [`operatorCore_sim.v`](https://github.com/suoglu/Fixed-Floating-Point-Adder-Multiplier/blob/master/Simulation/operatorCore_sim.v) file, which is included in the repository. [`operatorCore_sim.v`](https://github.com/suoglu/Fixed-Floating-Point-Adder-Multiplier/blob/master/Simulation/operatorCore_sim.v) file contains 4 test cases. Note that simulation code does not simulate a top module, but the calculation modules.
+Designed system was successfully simulated using [`operatorCore_sim.v`](blob/master/Simulation/operatorCore_sim.v) file, which is included in the repository. [`operatorCore_sim.v`](blob/master/Simulation/operatorCore_sim.v) file contains 4 test cases. Note that simulation code does not simulate a top module, but the calculation modules.
  
 ---
 ### Issues
