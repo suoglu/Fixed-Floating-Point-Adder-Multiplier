@@ -52,7 +52,7 @@ module operatorCore_sim();
             #250
             num1 <= 16'b1111110110111010;
             num2 <= 16'b0100111001001111;
-            #250
+            //#250
             //$finish;
         end
     initial 
