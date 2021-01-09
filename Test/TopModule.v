@@ -19,6 +19,7 @@ module FixedFloatingAddMulti(clk, rst, sw, leds, btnU, btnL, btnR, btnD,seg, an0
 
   wire [6:0] abcdefg1, abcdefg2, abcdefg3, abcdefg0;
   wire [15:0] result_flA, result_flM, result_fiA, result_fiM;
+  wire [31:0] result_fiM_full;
   reg [15:0] result, num1, num2;
   reg [1:0] state;
   reg overflow;
@@ -27,6 +28,7 @@ module FixedFloatingAddMulti(clk, rst, sw, leds, btnU, btnL, btnR, btnD,seg, an0
   wire commonBTN; //senstive to all buttons (except rst)
   wire of_FlA, of_FlM, of_FiA, of_FiM; //overflow signals for operations
   wire ssdEnable; //enables decoders
+  wire precisionLost_FiM;
   
   assign seg = {g,f,e,d,c,b,a};
   assign FlAd = btnU; //Up ~ Float Add
@@ -36,7 +38,7 @@ module FixedFloatingAddMulti(clk, rst, sw, leds, btnU, btnL, btnR, btnD,seg, an0
   //Modules Start
   //operators
   fixed_adder fiA(.num1(num1), .num2(num2), .result(result_fiA), .overflow(of_FiA));
-  fixed_multi fiM(.num1(num1), .num2(num2), .result(result_fiM), .overflow(of_FiM));
+  fixed_multi fiM(.num1(num1), .num2(num2), .result(result_fiM), .overflow(of_FiM), .precisionLost(precisionLost_FiM), .result_full(result_fiM_full));
   float_multi flM(.num1(num1), .num2(num2), .result(result_flM), .overflow(of_FlM));
   float_adder flA(.num1(num1), .num2(num2), .result(result_flA), .overflow(of_FlA));
 

@@ -33,21 +33,23 @@ module fixed_adder(num1, num2, result, overflow);
 
   //single assign statement handles fixed additon
   assign {overflow, result} = (num1 + num2);
-
 endmodule
 
 //fixed multi multiplies unsigned fixed numbers. Overflow flag is high in case of overflow
-module fixed_multi(num1, num2, result, overflow);
+module fixed_multi(num1, num2, result, overflow, precisionLost, result_full);
   input [15:0] num1, num2; //num1 is multiplicand and num2 is multiplier
   output [15:0] result;
-  output overflow;
-  reg [22:0] mid [15:0]; //shifted values
-  reg [23:0] midB[3:0]; //addition of shifted values
-  wire [23:0] preResult; //24-bit results
+  output overflow, precisionLost;
+  reg [31:0] mid [15:0]; //shifted values
+  reg [31:0] midB[3:0]; //addition of shifted values
+  output [31:0] result_full; //32-bit results
+  wire [31:0] num1_ext;
 
-  assign result = preResult[15:0]; //least significant 16-bit is results
-  assign overflow = |preResult[23:16]; // most significant 8-bit is overflow
-  assign preResult = midB[0] + midB[1] + midB[2] + midB[3];
+  assign num1_ext = {8'd0, num1, 8'd0};
+  assign precisionLost = |result_full[7:0];
+  assign result = result_full[23:8]; //get rid of extra bits
+  assign overflow = |result_full[31:24]; // most significant 8-bit is overflow
+  assign result_full = midB[0] + midB[1] + midB[2] + midB[3];
   always@* //midB wires are added for readability
     begin
       midB[0] = mid[0] + mid[4] + mid[8] + mid[15];
@@ -57,22 +59,22 @@ module fixed_multi(num1, num2, result, overflow);
     end
   always@* //shift and enable control
     begin
-      mid[0] = (num1 >> 8) & {16{num2[0]}};
-      mid[1] = (num1 >> 7) & {16{num2[1]}};
-      mid[2] = (num1 >> 6) & {16{num2[2]}};
-      mid[3] = (num1 >> 5) & {16{num2[3]}};
-      mid[4] = (num1 >> 4) & {16{num2[4]}};
-      mid[5] = (num1 >> 3) & {16{num2[5]}};
-      mid[6] = (num1 >> 2) & {16{num2[6]}};
-      mid[7] = (num1 >> 1) & {16{num2[7]}};
-      mid[8] =  num1 & {16{num2[8]}};
-      mid[9] = (num1 << 1) & {16{num2[9]}};
-      mid[10] = (num1 << 2) & {16{num2[10]}};
-      mid[11] = (num1 << 3) & {16{num2[11]}};
-      mid[12] = (num1 << 4) & {16{num2[12]}};
-      mid[13] = (num1 << 5) & {16{num2[13]}};
-      mid[14] = (num1 << 6) & {16{num2[14]}};
-      mid[15] = (num1 << 7) & {16{num2[15]}};
+      mid[0]  = (num1_ext >> 8) & {32{num2[0]}};
+      mid[1]  = (num1_ext >> 7) & {32{num2[1]}};
+      mid[2]  = (num1_ext >> 6) & {32{num2[2]}};
+      mid[3]  = (num1_ext >> 5) & {32{num2[3]}};
+      mid[4]  = (num1_ext >> 4) & {32{num2[4]}};
+      mid[5]  = (num1_ext >> 3) & {32{num2[5]}};
+      mid[6]  = (num1_ext >> 2) & {32{num2[6]}};
+      mid[7]  = (num1_ext >> 1) & {32{num2[7]}};
+      mid[8]  =  num1_ext       & {32{num2[8]}};
+      mid[9]  = (num1_ext << 1) & {32{num2[9]}};
+      mid[10] = (num1_ext << 2) & {32{num2[10]}};
+      mid[11] = (num1_ext << 3) & {32{num2[11]}};
+      mid[12] = (num1_ext << 4) & {32{num2[12]}};
+      mid[13] = (num1_ext << 5) & {32{num2[13]}};
+      mid[14] = (num1_ext << 6) & {32{num2[14]}};
+      mid[15] = (num1_ext << 7) & {32{num2[15]}};
     end
 
 endmodule
@@ -146,19 +148,21 @@ module float_adder(num1, num2, result, overflow, zero);
   wire [10:0] sum; //sum of numbers with integer parts
   wire sum_carry;
   wire sameSign;
+  wire zeroSmall;
   
   //Flags
   assign zero = (num1[14:0] == num2[14:0]) & (~num1[15] == num2[15]);
   assign overflow = &big_ex & sum_carry & sameSign;
   //Get result
   assign result[15] = big_sig; //result sign same as big sign
-  assign result[14:10] = big_ex + {4'd0, sum_carry}; //result exponent
-  assign result[9:0] = (sum_carry) ? sum[10:1] : sum[9:0];
+  assign result[14:10] = big_ex + {4'd0, (~zeroSmall & sum_carry)}; //result exponent
+  assign result[9:0] = (zeroSmall) ? big_fra : ((sum_carry) ? sum[10:1] : sum[9:0]);
 
   //decode numbers
   assign {big_sig, big_ex, big_fra} = bigNum;
   assign {small_sig, small_ex, small_fra} = smallNum;
   assign sameSign = (big_sig == small_sig);
+  assign zeroSmall = (|small_ex | |small_fra);
 
   //add integer parts
   assign big_float = {1'b1, big_fra};

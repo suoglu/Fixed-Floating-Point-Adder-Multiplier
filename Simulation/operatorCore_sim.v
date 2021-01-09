@@ -22,9 +22,10 @@ module operatorCore_sim();
     wire num1_sign, num2_sign, floM_sign, floA_sign;
     wire [4:0] num1_exp, num2_exp, floM_exp, floA_exp;
     wire [9:0] num1_frac, num2_frac, floM_frac, floA_frac;
+    wire precisionLost;
     
     fixed_adder uut0(num1, num2, fixA, overflow[0]);
-    fixed_multi uut1(num1, num2, fixM, overflow[1]);
+    fixed_multi uut1(num1, num2, fixM, overflow[1], precisionLost,);
     float_multi uut2(num1, num2, floM, overflow[2]);
     float_adder uut3(num1, num2, floA, overflow[3]);
 
@@ -52,7 +53,7 @@ module operatorCore_sim();
             num1 <= 16'b1111110110111010;
             num2 <= 16'b0100111001001111;
             #250
-            $finish;
+            //$finish;
         end
     initial 
         begin  
