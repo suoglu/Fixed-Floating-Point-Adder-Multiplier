@@ -1,6 +1,16 @@
-// Yigit Suoglu
-// This file contains modules for addition and multipication of 16 bit unsigned
-// fixed point and signed floating point formated numbers
+/* ---------------------------------------------------- *
+ * Title       : FixFlo Adder Multiplier Modules        *
+ * Project     : Fixed Floating Point Adder Multiplier  *
+ * ---------------------------------------------------- *
+ * File        : adder-multiplier.v                      *
+ * Author      : Yigit Suoglu                           *
+ * Last Edit   : /01/2021                               *
+ * ---------------------------------------------------- *
+ * Description : Modules for addition and multipication *
+ *               of 16 bit unsigned fixed point and     *
+ *               signed floating point formated numbers *
+ * ---------------------------------------------------- */
+
 /*
  * Fixed Point Format:
  *   Most significant 8 bits represent integer part and Least significant 8 bits
@@ -67,8 +77,9 @@ module fixed_multi(num1, num2, result, overflow);
 
 endmodule
 
-//float multi multiplies floating point numbers. Overflow flag is high in case of overflow
-//FIX: multiplication of fractions can increase exponent (e.g. 1.8 * 1.6)
+//float multi multiplier floating point numbers. Overflow flag is high in case of overflow
+//TODO: fix & verfy module
+//TODO: multiplication of fractions can increase exponent (e.g. 1.8 * 1.6)
 module float_multi(num1, num2, result, overflow);
   input [15:0] num1, num2;
   output [15:0] result;
@@ -115,35 +126,45 @@ module float_multi(num1, num2, result, overflow);
 endmodule
 
 //float multi multiplies floating point numbers. Overflow flag is high in case of overflow
-module float_adder(num1, num2, result, overflow);
+//TODO: fix & verfy module
+module float_adder(num1, num2, result, overflow, zero);
+  //Ports
   input [15:0] num1, num2;
   output [15:0] result;
   output overflow; //overflow flag
+  output zero; //zero flag
+  //Reassing numbers as big and small
   reg [15:0] bigNum, smallNum; //to seperate big and small numbers
+  //Decode big and small number
   wire [9:0] big_fra, small_fra; //to hold fraction part
   wire [4:0] big_ex, small_ex; //to hold exponent part
-  wire [5:0] exCheck;
   wire big_sig, small_sig; //to hold signs
   wire [10:0] big_float, small_float; //to hold as float number with integer
   reg [10:0] sign_small_float, shifted_small_float; //preparing small float
   wire [3:0] ex_diff; //difrence between exponentials
-  wire [11:0] sum; //sum of numbers with integer parts
+
+  wire [10:0] sum; //sum of numbers with integer parts
+  wire sum_carry;
+  wire sameSign;
   
-  assign overflow = (big_sig & small_sig) & ((&big_ex) & (&small_ex)) & sum[11]; //not optimesed
+  //Flags
+  assign zero = (num1[14:0] == num2[14:0]) & (~num1[15] == num2[15]);
+  assign overflow = &big_ex & sum_carry & sameSign;
+  //Get result
   assign result[15] = big_sig; //result sign same as big sign
-  assign result[14:10] = exCheck[4:0]; //get result exponent from exCheck
-  assign result[9:0] = (sum[11]) ? sum[10:1] : sum[9:0];
+  assign result[14:10] = big_ex + {4'd0, sum_carry}; //result exponent
+  assign result[9:0] = (sum_carry) ? sum[10:1] : sum[9:0];
 
   //decode numbers
   assign {big_sig, big_ex, big_fra} = bigNum;
   assign {small_sig, small_ex, small_fra} = smallNum;
+  assign sameSign = (big_sig == small_sig);
+
   //add integer parts
   assign big_float = {1'b1, big_fra};
   assign small_float = {1'b1, small_fra};
   assign ex_diff = big_ex - small_ex; //diffrence between exponents
-  assign sum = sign_small_float + big_float; //add numbers
-  //increase exponent if sum is shifted
-  assign exCheck = (sum[11]) ? (big_ex + 5'b1) : big_ex;
+  assign {sum_carry, sum} = sign_small_float + big_float; //add numbers
 
   always@* //take small number to exponent of big number
     begin
@@ -165,13 +186,13 @@ module float_adder(num1, num2, result, overflow);
 
   always@* //if signs are diffrent take 2s compliment of small number
     begin
-      if(big_sig != small_ex)
+      if(sameSign)
         begin
-          sign_small_float = ~shifted_small_float + 11'b1;
+          sign_small_float = shifted_small_float;
         end
       else
         begin
-          sign_small_float = shifted_small_float;
+          sign_small_float = ~shifted_small_float + 11'b1;
         end
     end
 
@@ -201,5 +222,4 @@ module float_adder(num1, num2, result, overflow);
           smallNum = num2;
         end
     end
-
 endmodule
