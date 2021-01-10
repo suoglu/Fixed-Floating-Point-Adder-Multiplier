@@ -162,7 +162,7 @@ module float_adder(num1, num2, result, overflow, zero);
   assign {big_sig, big_ex, big_fra} = bigNum;
   assign {small_sig, small_ex, small_fra} = smallNum;
   assign sameSign = (big_sig == small_sig);
-  assign zeroSmall = (|small_ex | |small_fra);
+  assign zeroSmall = ~(|small_ex | |small_fra);
 
   //add integer parts
   assign big_float = {1'b1, big_fra};
