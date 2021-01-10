@@ -128,7 +128,6 @@ module float_multi(num1, num2, result, overflow);
 endmodule
 
 //float multi multiplies floating point numbers. Overflow flag is high in case of overflow
-//TODO: fix & verfy module
 module float_adder(num1, num2, result, overflow, zero);
   //Ports
   input [15:0] num1, num2;
@@ -144,6 +143,9 @@ module float_adder(num1, num2, result, overflow, zero);
   wire [10:0] big_float, small_float; //to hold as float number with integer
   reg [10:0] sign_small_float, shifted_small_float; //preparing small float
   wire [3:0] ex_diff; //difrence between exponentials
+  reg [9:0] sum_shifted; //Shift fraction part of sum
+  reg [3:0] shift_am;
+  wire neg_exp;
 
   wire [10:0] sum; //sum of numbers with integer parts
   wire sum_carry;
@@ -155,8 +157,8 @@ module float_adder(num1, num2, result, overflow, zero);
   assign overflow = &big_ex & sum_carry & sameSign;
   //Get result
   assign result[15] = big_sig; //result sign same as big sign
-  assign result[14:10] = big_ex + {4'd0, (~zeroSmall & sum_carry)}; //result exponent
-  assign result[9:0] = (zeroSmall) ? big_fra : ((sum_carry) ? sum[10:1] : sum[9:0]);
+  assign result[14:10] = (sameSign) ? (big_ex + {4'd0, (~zeroSmall & sum_carry & sameSign)}) : ((neg_exp | (shift_am == 4'd10)) ? 5'd0 : (~shift_am + big_ex + 5'd1)); //result exponent
+  assign result[9:0] = (zeroSmall) ? big_fra : ((sameSign) ? ((sum_carry) ? sum[10:1] : sum[9:0]) : ((neg_exp) ? 10'd0 : sum_shifted));
 
   //decode numbers
   assign {big_sig, big_ex, big_fra} = bigNum;
@@ -170,20 +172,92 @@ module float_adder(num1, num2, result, overflow, zero);
   assign ex_diff = big_ex - small_ex; //diffrence between exponents
   assign {sum_carry, sum} = sign_small_float + big_float; //add numbers
 
-  always@* //take small number to exponent of big number
+  //Get shift amount for subtraction
+  assign neg_exp = (big_ex < shift_am);
+  always@*
+    begin
+      casex(sum)
+        11'b1xxxxxxxxxx:
+          begin
+            shift_am = 4'd0;
+          end
+        11'b01xxxxxxxxx:
+          begin
+            shift_am = 4'd1;
+          end
+        11'b001xxxxxxxx:
+          begin
+            shift_am = 4'd2;
+          end
+        11'b0001xxxxxxx:
+          begin
+            shift_am = 4'd3;
+          end
+        11'b00001xxxxxx:
+          begin
+            shift_am = 4'd4;
+          end
+        11'b000001xxxxx:
+          begin
+            shift_am = 4'd5;
+          end
+        11'b0000001xxxx:
+          begin
+            shift_am = 4'd6;
+          end
+        11'b00000001xxx:
+          begin
+            shift_am = 4'd7;
+          end
+        11'b000000001xx:
+          begin
+            shift_am = 4'd8;
+          end
+        11'b0000000001x:
+          begin
+            shift_am = 4'd9;
+          end
+        default:
+          begin
+            shift_am = 4'd10;
+          end
+      endcase
+      
+    end
+
+  //Shift result for sub.
+  always@* 
+    begin
+      case (shift_am)
+        4'd0: sum_shifted = sum[9:0];
+        4'd1: sum_shifted = (sum[9:0] << 1);
+        4'd2: sum_shifted = (sum[9:0] << 2);
+        4'd3: sum_shifted = (sum[9:0] << 3);
+        4'd4: sum_shifted = (sum[9:0] << 4);
+        4'd5: sum_shifted = (sum[9:0] << 5);
+        4'd6: sum_shifted = (sum[9:0] << 6);
+        4'd7: sum_shifted = (sum[9:0] << 7);
+        4'd8: sum_shifted = (sum[9:0] << 8);
+        4'd9: sum_shifted = (sum[9:0] << 9);
+        default: sum_shifted = (sum[9:0] << 10);
+      endcase
+    end
+
+  //take small number to exponent of big number
+  always@* 
     begin
       case (ex_diff)
-        0: shifted_small_float = small_float;
-        1: shifted_small_float = (small_float >> 1);
-        2: shifted_small_float = (small_float >> 2);
-        3: shifted_small_float = (small_float >> 3);
-        4: shifted_small_float = (small_float >> 4);
-        5: shifted_small_float = (small_float >> 5);
-        6: shifted_small_float = (small_float >> 6);
-        7: shifted_small_float = (small_float >> 7);
-        8: shifted_small_float = (small_float >> 8);
-        9: shifted_small_float = (small_float >> 9);
-        10: shifted_small_float = (small_float >> 10);
+        4'd0: shifted_small_float = small_float;
+        4'd1: shifted_small_float = (small_float >> 1);
+        4'd2: shifted_small_float = (small_float >> 2);
+        4'd3: shifted_small_float = (small_float >> 3);
+        4'd4: shifted_small_float = (small_float >> 4);
+        4'd5: shifted_small_float = (small_float >> 5);
+        4'd6: shifted_small_float = (small_float >> 6);
+        4'd7: shifted_small_float = (small_float >> 7);
+        4'd8: shifted_small_float = (small_float >> 8);
+        4'd9: shifted_small_float = (small_float >> 9);
+        4'd10: shifted_small_float = (small_float >> 10);
         default: shifted_small_float = 11'b0;
       endcase
     end
