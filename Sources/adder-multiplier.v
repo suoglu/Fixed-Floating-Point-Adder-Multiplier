@@ -80,51 +80,248 @@ module fixed_multi(num1, num2, result, overflow, precisionLost, result_full);
 endmodule
 
 //float multi multiplier floating point numbers.
-//TODO: fix & verfy module
-//TODO: multiplication of fractions can increase exponent (e.g. 1.8 * 1.6)
-module float_multi(num1, num2, result, overflow);
+//TODO: Multipcation of 1 subnormal, 1 normal
+module float_multi(num1, num2, result, overflow, zero, NaN, precisionLost);
+  //Operands
   input [15:0] num1, num2;
   output [15:0] result;
-  output overflow;
-  wire sign1, sign2, signr; //hold signs
-  wire [4:0] ex1, ex2; //hold exponents
-  wire [9:0] fra1, fra2; //hold fractions
-  wire [10:0] float1; // true value of fra1 i.e. 1.ffffffffff
+  //Flags
+  output overflow;//overflow flag
+  output zero; //zero flag
+  output NaN; //Not a Number flag
+  output precisionLost;
+  //Decode numbers
+  wire sign1, sign2, signR; //hold signs
+  wire [4:0] ex1, ex2, exR; //hold exponents
+  wire [4:0] ex1_pre, ex2_pre, exR_calc; //hold exponents
+  reg [4:0] exSubCor;
+  wire [9:0] fra1, fra2, fraR; //hold fractions
+  reg [9:0] fraSub;
+  wire [20:0] float1;
+  wire [10:0] float2;
   wire [5:0] exSum; //exponent sum
-  wire [10:0] float_res; //fraction result
-  reg [10:0] mid[9:0], mid2[1:0];
+  wire [11:0] float_res; //result
+  wire [9:0] dump_res; //Lost precision
+  wire [21:0] res_full;
+  reg [20:0] mid[10:0];
+  wire inf_num; //at least on of the operands is inf.
+  wire NsubNormal;
 
-  assign overflow = exSum[5]; //extra digit of final sum exist at overflow
-  //decode numbers
-  assign {sign1, ex1, fra1} = num1;
-  assign {sign2, ex2, fra2} = num2;
-  //Same signs give 0 (positive), different signs give 1 (negative)
-  assign signr = (sign1 ^ sign2);
-  assign exSum = (ex1 + ex2); //exponentials are added
-  assign float1 = {1'b1, fra1};
-  assign float_res = float1 + mid2[1] + mid2[0]; //add mid2 terms and integer  of num2
-  assign result = {signr, exSum[4:0], float_res[9:0]};
+  //Flags
+  assign zero = ~(|num1[14:0] & |num2[14:0]) | (~NsubNormal & ((fraSub == 10'd0) | ((exSubCor > exSum[4:0]) & |{ex1_pre,ex2_pre})));
+  assign NaN = (&num1[14:10] & |num1[9:0]) | (&num2[14:10] & |num2[9:0]);
+  assign inf_num = (&num1[14:10] & ~|num1[9:0]) | (&num2[14:10] & ~|num2[9:0]); //check for infinate number
+  assign overflow = inf_num | exSum[5] | &exSum[4:0];
+  assign NsubNormal = |float_res[11:10];
+  assign precisionLost = |dump_res;
+  
+  //decode-encode numbers
+  assign {sign1, ex1_pre, fra1} = num1;
+  assign {sign2, ex2_pre, fra2} = num2;
+  assign ex1 = ex1_pre + {4'd0, ~|ex1_pre};
+  assign ex2 = ex2_pre + {4'd0, ~|ex2_pre};
+  assign result = {signR, exR, fraR};
+  assign res_full = {float_res, dump_res};
+  
+  //exponentials are added
+  assign exSum = {1'b0,ex1} + {1'b0,ex2}; 
+
+  //Get floating numbers
+  assign float1 = {|ex1_pre, fra1, 10'd0};
+  assign float2 = {|ex2_pre, fra2};
+
+  //Calculate result
+  assign signR = (sign1 ^ sign2);
+  assign exR_calc = exSum[4:0]+ {4'd0, float_res[11]} + (~exSubCor & {5{~NsubNormal}}) + {4'd0, ~NsubNormal};
+  assign exR = ((overflow) ? 5'b11111 : (exR_calc & {5{NsubNormal}})) & {5{~zero}};
+  assign fraR = (zero | overflow) ? 10'd0 : ((NsubNormal  | ~|{ex1_pre,ex2_pre}) ? ((float_res[11]) ? float_res[10:1] : float_res[9:0]) : fraSub);
+  assign {float_res, dump_res} = mid[0] + mid[1] + mid[2] + mid[3] + mid[4] + mid[5] + mid[6] + mid[7] + mid[8] + mid[9] + mid[10];
 
   always@* //create mids from fractions
     begin
-      mid[0] = (float1 >> 10) & {16{fra2[0]}};
-      mid[1] = (float1 >> 9) & {16{fra2[1]}};
-      mid[2] = (float1 >> 8) & {16{fra2[2]}};
-      mid[3] = (float1 >> 7) & {16{fra2[3]}};
-      mid[4] = (float1 >> 6) & {16{fra2[4]}};
-      mid[5] = (float1 >> 5) & {16{fra2[5]}};
-      mid[6] = (float1 >> 4) & {16{fra2[6]}};
-      mid[7] = (float1 >> 3) & {16{fra2[7]}};
-      mid[8] = (float1 >> 2) & {16{fra2[8]}};
-      mid[9] = (float1 >> 1) & {16{fra2[9]}};
+      mid[0] = (float1 >> 10) & {21{float2[0]}};
+      mid[1] = (float1 >> 9)  & {21{float2[1]}};
+      mid[2] = (float1 >> 8)  & {21{float2[2]}};
+      mid[3] = (float1 >> 7)  & {21{float2[3]}};
+      mid[4] = (float1 >> 6)  & {21{float2[4]}};
+      mid[5] = (float1 >> 5)  & {21{float2[5]}};
+      mid[6] = (float1 >> 4)  & {21{float2[6]}};
+      mid[7] = (float1 >> 3)  & {21{float2[7]}};
+      mid[8] = (float1 >> 2)  & {21{float2[8]}};
+      mid[9] = (float1 >> 1)  & {21{float2[9]}};
+      mid[10] = float1        & {21{float2[10]}};
     end
-
-  always@* //create mid2s from mids
+  //Corrections for subnormal normal op
+  always@*
     begin
-      mid2[1] = mid[0] + mid[1] + mid[2] + mid[3] + mid[4];
-      mid2[0] = mid[5] + mid[6] + mid[7] + mid[8] + mid[9];
+      casex(res_full)
+        22'b001xxxxxxxxxxxxxxxxxxx:
+          begin
+            fraSub = res_full[18:9];
+          end
+        22'b0001xxxxxxxxxxxxxxxxxx:
+          begin
+            fraSub = res_full[17:8];
+          end
+        22'b00001xxxxxxxxxxxxxxxxx:
+          begin
+            fraSub = res_full[16:7];
+          end
+        22'b000001xxxxxxxxxxxxxxxx:
+          begin
+            fraSub = res_full[15:6];
+          end
+        22'b0000001xxxxxxxxxxxxxxx:
+          begin
+            fraSub = res_full[14:5];
+          end
+        22'b00000001xxxxxxxxxxxxxx:
+          begin
+            fraSub = res_full[13:4];
+          end
+        22'b000000001xxxxxxxxxxxxx:
+          begin
+            fraSub = res_full[12:3];
+          end
+        22'b0000000001xxxxxxxxxxxx:
+          begin
+            fraSub = res_full[11:2];
+          end
+        22'b00000000001xxxxxxxxxxx:
+          begin
+            fraSub = res_full[10:1];
+          end
+        22'b000000000001xxxxxxxxxx:
+          begin
+            fraSub = res_full[9:0];
+          end
+        22'b0000000000001xxxxxxxxx:
+          begin
+            fraSub = {res_full[8:0], 1'd0};
+          end
+        22'b00000000000001xxxxxxxx:
+          begin
+            fraSub = {res_full[7:0], 2'd0};
+          end
+        22'b000000000000001xxxxxxx:
+          begin
+            fraSub = {res_full[6:0], 3'd0};
+          end
+        22'b0000000000000001xxxxxx:
+          begin
+            fraSub = {res_full[5:0], 4'd0};
+          end
+        22'b00000000000000001xxxxx:
+          begin
+            fraSub = {res_full[4:0], 5'd0};
+          end
+        22'b000000000000000001xxxx:
+          begin
+            fraSub = {res_full[3:0], 6'd0};
+          end
+        22'b0000000000000000001xxx:
+          begin
+            fraSub = {res_full[2:0], 7'd0};
+          end
+        22'b00000000000000000001xx:
+          begin
+            fraSub = {res_full[1:0], 8'd0};
+          end
+        22'b000000000000000000001x:
+          begin
+            fraSub = {res_full[0], 9'd0};
+          end
+        default:
+          begin
+            fraSub = 10'd0;
+          end
+      endcase
     end
-
+  always@*
+    begin
+      casex(res_full)
+        22'b001xxxxxxxxxxxxxxxxxxx:
+          begin
+            exSubCor = 5'd1;
+          end
+        22'b0001xxxxxxxxxxxxxxxxxx:
+          begin
+            exSubCor = 5'd2;
+          end
+        22'b00001xxxxxxxxxxxxxxxxx:
+          begin
+            exSubCor = 5'd3;
+          end
+        22'b000001xxxxxxxxxxxxxxxx:
+          begin
+            exSubCor = 5'd4;
+          end
+        22'b0000001xxxxxxxxxxxxxxx:
+          begin
+            exSubCor = 5'd5;
+          end
+        22'b00000001xxxxxxxxxxxxxx:
+          begin
+            exSubCor = 5'd6;
+          end
+        22'b000000001xxxxxxxxxxxxx:
+          begin
+            exSubCor = 5'd7;
+          end
+        22'b0000000001xxxxxxxxxxxx:
+          begin
+            exSubCor = 5'd8;
+          end
+        22'b00000000001xxxxxxxxxxx:
+          begin
+            exSubCor = 5'd9;
+          end
+        22'b000000000001xxxxxxxxxx:
+          begin
+            exSubCor = 5'd10;
+          end
+        22'b0000000000001xxxxxxxxx:
+          begin
+            exSubCor = 5'd11;
+          end
+        22'b00000000000001xxxxxxxx:
+          begin
+            exSubCor = 5'd12;
+          end
+        22'b000000000000001xxxxxxx:
+          begin
+            exSubCor = 5'd13;
+          end
+        22'b0000000000000001xxxxxx:
+          begin
+            exSubCor = 5'd14;
+          end
+        22'b00000000000000001xxxxx:
+          begin
+            exSubCor = 5'd15;
+          end
+        22'b000000000000000001xxxx:
+          begin
+            exSubCor = 5'd16;
+          end
+        22'b0000000000000000001xxx:
+          begin
+            exSubCor = 5'd17;
+          end
+        22'b00000000000000000001xx:
+          begin
+            exSubCor = 5'd18;
+          end
+        22'b000000000000000000001x:
+          begin
+            exSubCor = 5'd19;
+          end
+        default:
+          begin
+            exSubCor = 5'd0;
+          end
+      endcase
+    end
 endmodule
 
 //float multi multiplies floating point numbers.

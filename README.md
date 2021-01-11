@@ -145,4 +145,4 @@ Floating point adder module simulated using [`float_add_sim.v`](Simulation/float
 
 ## Issues
 
-`float_multi` module does not work properly when the result of multiplication of two fractions is larger than 2.
+`float_multi` module does not work properly when a subnormal and normal number multiplied
