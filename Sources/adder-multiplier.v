@@ -4,7 +4,7 @@
  * ---------------------------------------------------- *
  * File        : adder-multiplier.v                      *
  * Author      : Yigit Suoglu                           *
- * Last Edit   : /01/2021                               *
+ * Last Edit   : 11/01/2021                               *
  * ---------------------------------------------------- *
  * Description : Modules for addition and multipication *
  *               of 16 bit unsigned fixed point and     *
@@ -19,13 +19,13 @@
  * ----------------------------------------------------------------------------
  * Floating Point Format:
  *   binary16 (IEEE 754-2008) is used. MSB used as sign bit. 10 least significant
- *   bits are used as fraction and remaining bits are used as exponent
+ *   bits are used as fraction and remaining bits are used as exponent.
  *   i.e. SEEEEEFFFFFFFFFF = (-1)^S * 1.FFFFFFFFFF * 2^(EEEEE - 15)
  */
 
 `timescale 1ns / 1ps
 
-//fixed adder adds unsigned fixed numbers. Overflow flag is high in case of overflow
+//fixed adder adds unsigned fixed numbers.
 module fixed_adder(num1, num2, result, overflow);
   input [15:0] num1, num2;
   output [15:0] result;
@@ -35,7 +35,7 @@ module fixed_adder(num1, num2, result, overflow);
   assign {overflow, result} = (num1 + num2);
 endmodule
 
-//fixed multi multiplies unsigned fixed numbers. Overflow flag is high in case of overflow
+//fixed multi multiplies unsigned fixed numbers.
 module fixed_multi(num1, num2, result, overflow, precisionLost, result_full);
   input [15:0] num1, num2; //num1 is multiplicand and num2 is multiplier
   output [15:0] result;
@@ -79,7 +79,7 @@ module fixed_multi(num1, num2, result, overflow, precisionLost, result_full);
 
 endmodule
 
-//float multi multiplier floating point numbers. Overflow flag is high in case of overflow
+//float multi multiplier floating point numbers.
 //TODO: fix & verfy module
 //TODO: multiplication of fractions can increase exponent (e.g. 1.8 * 1.6)
 module float_multi(num1, num2, result, overflow);
@@ -127,7 +127,7 @@ module float_multi(num1, num2, result, overflow);
 
 endmodule
 
-//float multi multiplies floating point numbers. Overflow flag is high in case of overflow
+//float multi multiplies floating point numbers.
 module float_adder(num1, num2, result, overflow, zero, NaN);
   //Ports
   input [15:0] num1, num2;

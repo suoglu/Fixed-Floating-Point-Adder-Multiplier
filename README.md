@@ -48,6 +48,7 @@ This project was originated from a laboratory assignment and rewritten with [Xil
 | overflow | Result does not fit or is infinite |
 | zero | Result is zero |
 | NaN | One or both of the operands are not a number |
+| precisionLost | Result has errors due to precision lost |
 
 ### Fixed Point Adder
 
@@ -102,9 +103,9 @@ I: Input  O: Output
 
 !!!There are some issues, check below!!!
 
-Fixed point modules simulated using [`operatorCore_sim.v`](Simulation/operatorCore_sim.v). [`operatorCore_sim.v`](Simulation/operatorCore_sim.v) file contains four test cases.
+Fixed point modules simulated using [`operatorCore_sim.v`](Simulation/operatorCore_sim.v). It contains four test cases.
 
-Floating point adder module simulated using [`float_add_sim.v`](Simulation/float_add_sim.v). [`float_add_sim.v`](Simulation/float_add_sim.v) contains ten test cases.
+Floating point adder module simulated using [`float_add_sim.v`](Simulation/float_add_sim.v). It contains ten test cases.
 
 ## Test
 
