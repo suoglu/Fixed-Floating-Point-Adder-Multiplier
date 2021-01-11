@@ -20,7 +20,7 @@
  * Floating Point Format:
  *   binary16 (IEEE 754-2008) is used. MSB used as sign bit. 10 least significant
  *   bits are used as fraction and remaining bits are used as exponent
- *   i.e. SEEEEEFFFFFFFFFF = (-1)^S * 1.FFFFFFFFFF * 2^EEEEE
+ *   i.e. SEEEEEFFFFFFFFFF = (-1)^S * 1.FFFFFFFFFF * 2^(EEEEE - 15)
  */
 
 `timescale 1ns / 1ps
@@ -128,16 +128,18 @@ module float_multi(num1, num2, result, overflow);
 endmodule
 
 //float multi multiplies floating point numbers. Overflow flag is high in case of overflow
-module float_adder(num1, num2, result, overflow, zero);
+module float_adder(num1, num2, result, overflow, zero, NaN);
   //Ports
   input [15:0] num1, num2;
   output [15:0] result;
   output overflow; //overflow flag
   output zero; //zero flag
+  output NaN; //Not a Number flag
   //Reassing numbers as big and small
   reg [15:0] bigNum, smallNum; //to seperate big and small numbers
   //Decode big and small number
   wire [9:0] big_fra, small_fra; //to hold fraction part
+  wire [4:0] big_ex_pre, small_ex_pre;
   wire [4:0] big_ex, small_ex; //to hold exponent part
   wire big_sig, small_sig; //to hold signs
   wire [10:0] big_float, small_float; //to hold as float number with integer
@@ -151,24 +153,29 @@ module float_adder(num1, num2, result, overflow, zero);
   wire sum_carry;
   wire sameSign;
   wire zeroSmall;
+  wire inf_num; //at least on of the operands is inf.
   
   //Flags
   assign zero = (num1[14:0] == num2[14:0]) & (~num1[15] == num2[15]);
-  assign overflow = &big_ex & sum_carry & sameSign;
+  assign overflow = ((&big_ex[4:1] & ~big_ex[0]) & sum_carry & sameSign) | inf_num;
+  assign NaN = (&num1[14:10] & |num1[9:0]) | (&num2[14:10] & |num2[9:0]);
+  assign inf_num = (&num1[14:10] & ~|num1[9:0]) | (&num2[14:10] & ~|num2[9:0]); //check for infinate number
   //Get result
   assign result[15] = big_sig; //result sign same as big sign
-  assign result[14:10] = (sameSign) ? (big_ex + {4'd0, (~zeroSmall & sum_carry & sameSign)}) : ((neg_exp | (shift_am == 4'd10)) ? 5'd0 : (~shift_am + big_ex + 5'd1)); //result exponent
-  assign result[9:0] = (zeroSmall) ? big_fra : ((sameSign) ? ((sum_carry) ? sum[10:1] : sum[9:0]) : ((neg_exp) ? 10'd0 : sum_shifted));
+  assign result[14:10] = ((sameSign) ? (big_ex + {4'd0, (~zeroSmall & sum_carry & sameSign)}) : ((neg_exp | (shift_am == 4'd10)) ? 5'd0 : (~shift_am + big_ex + 5'd1))) | {5{overflow}}; //result exponent
+  assign result[9:0] = ((zeroSmall) ? big_fra : ((sameSign) ? ((sum_carry) ? sum[10:1] : sum[9:0]) : ((neg_exp) ? 10'd0 : sum_shifted))) & {10{~overflow}};
 
   //decode numbers
-  assign {big_sig, big_ex, big_fra} = bigNum;
-  assign {small_sig, small_ex, small_fra} = smallNum;
+  assign {big_sig, big_ex_pre, big_fra} = bigNum;
+  assign {small_sig, small_ex_pre, small_fra} = smallNum;
   assign sameSign = (big_sig == small_sig);
   assign zeroSmall = ~(|small_ex | |small_fra);
+  assign big_ex = big_ex_pre + {4'd0, ~|big_ex_pre};
+  assign small_ex = small_ex_pre + {4'd0, ~|small_ex_pre};
 
   //add integer parts
-  assign big_float = {1'b1, big_fra};
-  assign small_float = {1'b1, small_fra};
+  assign big_float = {|big_ex_pre, big_fra};
+  assign small_float = {|small_ex_pre, small_fra};
   assign ex_diff = big_ex - small_ex; //diffrence between exponents
   assign {sum_carry, sum} = sign_small_float + big_float; //add numbers
 

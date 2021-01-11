@@ -19,14 +19,14 @@ module flpa_sim();
   wire [15:0] result, num1, num2;
   wire overflow, zero;
   wire [9:0] res_fra;
-  wire res_sign;
+  wire res_sign, nan;
   wire [4:0] res_exp;
 
   assign {res_sign, res_exp, res_fra} = result;
   assign num1 = {sign1, exp1, fra1};
   assign num2 = {sign2, exp2, fra2};
 
-  float_adder uut(num1, num2, result, overflow, zero);
+  float_adder uut(num1, num2, result, overflow, zero, nan);
 
   initial
     begin
@@ -86,18 +86,18 @@ module flpa_sim();
       fra1 = 10'b10011101;
       fra2 = 10'b10011101;
       #100
-      //Addition with precision lost
+      //nan flag
       sign1 = 0;
       sign2 = 0;
-      exp1 = 5'b11111;
-      exp2 = 5'b11110;
+      exp1 = 5'b10001;
+      exp2 = 5'b11111;
       fra1 = 10'b11111111;
       fra2 = 10'b11111111;
       #100
       //Overflow flag
       sign1 = 0;
       sign2 = 0;
-      exp1 = 5'b11111;
+      exp1 = 5'b11110;
       exp2 = 5'b11110;
       fra1 = 10'b1111111111;
       fra2 = 10'b1111111111;
@@ -106,8 +106,8 @@ module flpa_sim();
       sign1 = 0;
       sign2 = 0;
       exp1 = 5'b11111;
-      exp2 = 5'b11110;
-      fra1 = 10'b1111111111;
-      fra2 = 10'b0000000011;
+      exp2 = 5'b10010;
+      fra1 = 10'b0000000000;
+      fra2 = 10'b1110000011;
     end
 endmodule//module_name

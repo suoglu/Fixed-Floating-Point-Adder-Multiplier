@@ -23,13 +23,31 @@ This project was originated from a laboratory assignment and rewritten with [Xil
 
 **Fixed Point Format:**
 
- Most significant 8 bits represent integer part and least significant 8 bits represent fraction part.  i.e. `IIIIIIIIFFFFFFFF` = `IIIIIIII.FFFFFFFF`
+ Most significant 8 bits represent integer part and least significant 8 bits represent fraction part.
+
+ i.e. `IIIIIIIIFFFFFFFF` = `IIIIIIII.FFFFFFFF`
 
 **Floating Point Format:**
 
- binary16 (IEEE 754-2008) is used. MSB is used as sign bit. 10 least significant bits are used as fraction and remaining bits are used as exponent. Value `x000000000000000` represents 0. i.e. `SEEEEEFFFFFFFFFF` = `(-1)^S \* 1.FFFFFFFFFF \* 2^EEEEE`
+ binary16 (IEEE 754-2008) is used. MSB is used as sign bit. 10 least significant bits are used as fraction and remaining bits are used as exponent.
+
+ For `SEEEEEFFFFFFFFFF`:
+
+|   Exponent   | Fraction is 0 | Fraction is not 0 |
+| :------: | :----: | :----: |
+| `b00000` | 0 | (-1)^S \* 0.FFFFFFFFFF \* 2^(EEEEE-14) |
+| `b00001` to `b11110` | (-1)^S \* 2^(EEEEE-15) | (-1)^S \* 1.FFFFFFFFFF \* 2^(EEEEE-15) |
+| `b11111` | Infinity | NaN |
 
 ## Modules
+
+**Flags:**
+
+|   Flag   | Description |
+| :------: |   ------  |
+| overflow | Result does not fit or is infinite |
+| zero | Result is zero |
+| NaN | One or both of the operands are not a number |
 
 ### Fixed Point Adder
 
@@ -76,6 +94,7 @@ Module `float_adder` is an adder module that can add two half-precision floating
 | result | O | 16 | Result of the addition |
 | overflow | O | 1 | Overflow flag |
 | zero | O | 1 | Zero flag |
+| NaN | O | 1 | NaN flag |
 
 I: Input  O: Output
 
