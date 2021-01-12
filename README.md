@@ -35,7 +35,7 @@ This project was originated from a laboratory assignment and rewritten with [Xil
 
 |   Exponent   | Fraction is 0 | Fraction is not 0 |
 | :------: | :----: | :----: |
-| `b00000` | 0 | (-1)^S \* 0.FFFFFFFFFF \* 2^(EEEEE-14) |
+| `b00000` | 0 | (-1)^S \* 0.FFFFFFFFFF \* 2^(-14) |
 | `b00001` to `b11110` | (-1)^S \* 2^(EEEEE-15) | (-1)^S \* 1.FFFFFFFFFF \* 2^(EEEEE-15) |
 | `b11111` | Infinity | NaN |
 
@@ -99,6 +99,24 @@ Module `float_adder` is an adder module that can add two half-precision floating
 
 I: Input  O: Output
 
+### Floating Point Multiplier
+
+Module `float_multi` is an multiplier module that can multiply two half-precision floating-point format (binary16) numbers. Currently, multiplying a normal and a subnormal value does not work properly.
+
+**Ports:**
+
+|   Port   | Type | Width |  Description |
+| :------: | :----: | :----: |  ------  |
+| num1 | I | 16 | First operant |
+| num2 | I | 16 | Second operant |
+| result | O | 16 | Result of the multiplication |
+| overflow | O | 1 | Overflow flag |
+| zero | O | 1 | Zero flag |
+| NaN | O | 1 | NaN flag |
+| precisionLost | O | 1 | Precision lost flag |
+
+I: Input  O: Output
+
 ## Simulation
 
 !!!There are some issues, check below!!!
@@ -106,6 +124,8 @@ I: Input  O: Output
 Fixed point modules simulated using [`operatorCore_sim.v`](Simulation/operatorCore_sim.v). It contains four test cases.
 
 Floating point adder module simulated using [`float_add_sim.v`](Simulation/float_add_sim.v). It contains ten test cases.
+
+Floating point multiplier module simulated using [`float_multi_sim.v`](Simulation/float_multi_sim.v).
 
 ## Test
 
