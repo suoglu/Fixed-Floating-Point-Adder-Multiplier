@@ -134,7 +134,7 @@ module float_multi(num1, num2, result, overflow, zero, NaN, precisionLost);
   assign signR = (sign1 ^ sign2);
   assign exR_calc = exSum[4:0]+ {4'd0, float_res[11]} + (~exSubCor & {5{~NsubNormal}}) + {4'd0, ~NsubNormal};
   assign exR = ((overflow) ? 5'b11111 : (exR_calc & {5{NsubNormal}})) & {5{~zero}};
-  assign fraR = (zero | overflow) ? 10'd0 : ((NsubNormal  | ~|{ex1_pre,ex2_pre}) ? ((float_res[11]) ? float_res[10:1] : float_res[9:0]) : fraSub);
+  assign fraR = (zero | overflow) ? 10'd0 : ((NsubNormal | ~|{ex1_pre,ex2_pre}) ? ((float_res[11]) ? float_res[10:1] : float_res[9:0]) : fraSub);
   assign {float_res, dump_res} = mid[0] + mid[1] + mid[2] + mid[3] + mid[4] + mid[5] + mid[6] + mid[7] + mid[8] + mid[9] + mid[10];
 
   always@* //create mids from fractions

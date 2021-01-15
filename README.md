@@ -119,21 +119,19 @@ I: Input  O: Output
 
 ## Simulation
 
-!!!There are some issues, check below!!!
-
 Fixed point modules simulated using [`operatorCore_sim.v`](Simulation/operatorCore_sim.v). It contains four test cases.
 
 Floating point adder module simulated using [`float_add_sim.v`](Simulation/float_add_sim.v). It contains ten test cases.
 
-Floating point multiplier module simulated using [`float_multi_sim.v`](Simulation/float_multi_sim.v).
+Floating point multiplier module simulated using [`float_multi_sim.v`](Simulation/float_multi_sim.v). Module does not work properly when a normal and a subnormal number are multiplied.
 
 ## Test
 
 ### Inputs
 
 * `Number switches`: Used to enter operands
-* `Reset button (Center button)`: Used to reset system
-* `Operator buttons`: Used select operator, legend follows as:
+* `Reset/New calculation (Center button)`: Used to reset system or begin new calculation
+* `Operator buttons`: Switch operation, legend follows as:
   * `Up button`: Floating Format Addition
   * `Left button`: Floating Format Multiplication
   * `Down button`: Fixed Format Addition
@@ -141,7 +139,10 @@ Floating point multiplier module simulated using [`float_multi_sim.v`](Simulatio
 
 ### Outputs
 
-* `Overflow LED (Leftmost LED)`: Indicated overflow during operation
+* `Overflow LED (Leftmost LED)`: Indicates overflow during operation
+* `Zero LED (Second Leftmost LED)`: Indicateds zero result
+* `NaN LED (Third Leftmost LED)`: Indicates NaN error
+* `precisionLost LED (Forth Leftmost LED)`: Indicates precision lost during operation
 * `State LEDs (Rightmost two LEDs)`: Shows machine state, States follow as:
   1. `IDLE`: System does nothing, waits for user input
   2. `WAIT1`: System stores operand 1
@@ -153,7 +154,13 @@ Floating point multiplier module simulated using [`float_multi_sim.v`](Simulatio
 
 * This project provides a 16 bit adder multiplier hardware and interface for testing designed hardware
 * System works on two number formats shown at number formats section
-* Output is provided in the same format as operands
+* Output is provided in the same format as the operands
+* Flow:
+  * Start with `Reset/New calculation` button.
+  * Enter the first operand via `Switches` and press any one of the `Operator buttons`.
+  * Enter the second operand via `Switches` and press any one of the `Operator buttons`.
+  * System will calculate results for all of the modules. Shown output can be chosen via `Operator buttons`.
+  * To initiate a new calculation press `Reset/New calculation` button.
 
 ## Status
 
@@ -165,4 +172,6 @@ Floating point multiplier module simulated using [`float_multi_sim.v`](Simulatio
 
 ## Issues
 
-`float_multi` module does not work properly when a subnormal and normal number multiplied
+* `float_multi` module does not work properly when a subnormal and normal number are multiplied
+
+* Non of the modules are tested on FPGA yet
