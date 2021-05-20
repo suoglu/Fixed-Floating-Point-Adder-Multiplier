@@ -165,7 +165,7 @@ Floating point multiplier module simulated using [`float_multi_sim.v`](Simulatio
 
 ## Helper Script
 
-A phython 3 script, [binary16_verfiy.py](Sources/binary16_verfiy.py), added to help verfication. Script can be used to calculate operation results for binary16 format. Script asks sign, exponent and fraction seperately and displays sign, exponent and fraction of the result.
+A python 3 script, [binary16_verfiy.py](Sources/binary16_verfiy.py), added to help verfication. Script can be used to calculate operation results for binary16 format. Script asks sign, exponent and fraction seperately and displays sign, exponent and fraction of the result.
 
 ## Status
 
