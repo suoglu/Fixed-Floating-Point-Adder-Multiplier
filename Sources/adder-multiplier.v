@@ -1,15 +1,15 @@
-/* ---------------------------------------------------- *
- * Title       : FixFlo Adder Multiplier Modules        *
- * Project     : Fixed Floating Point Adder Multiplier  *
- * ---------------------------------------------------- *
+/* ----------------------------------------------------- *
+ * Title       : FixFlo Adder Multiplier Modules         *
+ * Project     : Fixed Floating Point Adder Multiplier   *
+ * ----------------------------------------------------- *
  * File        : adder-multiplier.v                      *
- * Author      : Yigit Suoglu                           *
- * Last Edit   : 11/01/2021                               *
- * ---------------------------------------------------- *
- * Description : Modules for addition and multipication *
- *               of 16 bit unsigned fixed point and     *
- *               signed floating point formated numbers *
- * ---------------------------------------------------- */
+ * Author      : Yigit Suoglu                            *
+ * Last Edit   : 11/01/2021                              *
+ * ----------------------------------------------------- *
+ * Description : Modules for addition and multiplication *
+ *               of 16 bit unsigned fixed point and      *
+ *               signed floating point formated numbers  *
+ * ----------------------------------------------------- */
 
 /*
  * Fixed Point Format:
