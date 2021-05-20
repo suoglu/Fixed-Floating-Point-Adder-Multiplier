@@ -2,7 +2,7 @@
  * Title       : FixFlo Adder Multiplier Modules         *
  * Project     : Fixed Floating Point Adder Multiplier   *
  * ----------------------------------------------------- *
- * File        : adder-multiplier.v                      *
+ * File        : adderMultiplier16.v                     *
  * Author      : Yigit Suoglu                            *
  * Last Edit   : 20/05/2021                              *
  * ----------------------------------------------------- *

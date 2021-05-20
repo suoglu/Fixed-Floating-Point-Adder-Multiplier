@@ -124,7 +124,7 @@ Fixed point modules simulated using [`operatorCore_sim.v`](Simulation/operatorCo
 
 Floating point adder module simulated using [`float_add_sim.v`](Simulation/float_add_sim.v). It contains ten test cases.
 
-Floating point multiplier module simulated using [`float_multi_sim.v`](Simulation/float_multi_sim.v). Module does not work properly when a normal and a subnormal number are multiplied.
+Floating point multiplier module simulated using [`float_multi_sim.v`](Simulation/float_multi_sim.v).
 
 ## Test
 
