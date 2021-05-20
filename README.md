@@ -165,18 +165,16 @@ Floating point multiplier module simulated using [`float_multi_sim.v`](Simulatio
 
 ## Helper Script
 
-A phython 3 script, [binary16_verfiy.py](Sources/binary16_verfiy.py), added to help verfication. Script can be used to calculate operation results for binary16 format. Script asks sign, exponent and fraction seperately and displays sign, exponent and fraction of the result. 
+A phython 3 script, [binary16_verfiy.py](Sources/binary16_verfiy.py), added to help verfication. Script can be used to calculate operation results for binary16 format. Script asks sign, exponent and fraction seperately and displays sign, exponent and fraction of the result.
 
 ## Status
 
 **Simulation:**
 
 * Fixed Point Modules: 9 January 2021, with [Vivado Simulator](https://www.xilinx.com/products/design-tools/vivado/simulator.html).
-
-* Floating Point Adder: 10 January 2021, with [Vivado Simulator](https://www.xilinx.com/products/design-tools/vivado/simulator.html).
+* Floating Point Adder: 20 May 2021, with [Vivado Simulator](https://www.xilinx.com/products/design-tools/vivado/simulator.html).
+* Floating Point Multiplier: 20 May 2021, with [Vivado Simulator](https://www.xilinx.com/products/design-tools/vivado/simulator.html).
 
 ## Issues
-
-* `float_multi` module does not work properly when a subnormal and normal number are multiplied
 
 * Non of the modules are tested on FPGA yet
