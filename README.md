@@ -7,8 +7,9 @@
 3. Modules
 4. Simulation
 5. Test
-6. Status
-7. Issues
+6. Helper Script
+7. Status
+8. Issues
 
 [![Repo on GitLab](https://img.shields.io/badge/repo-GitLab-6C488A.svg)](https://gitlab.com/suoglu/Fixed-Floating-Point-Adder-Multiplier)
 [![Repo on GitHub](https://img.shields.io/badge/repo-GitHub-3D76C2.svg)](https://github.com/suoglu/Fixed-Floating-Point-Adder-Multiplier)
@@ -161,6 +162,10 @@ Floating point multiplier module simulated using [`float_multi_sim.v`](Simulatio
   * Enter the second operand via `Switches` and press any one of the `Operator buttons`.
   * System will calculate results for all of the modules. Shown output can be chosen via `Operator buttons`.
   * To initiate a new calculation press `Reset/New calculation` button.
+
+## Helper Script
+
+A phython 3 script, [binary16_verfiy.py](Sources/binary16_verfiy.py), added to help verfication. Script can be used to calculate operation results for binary16 format. Script asks sign, exponent and fraction seperately and displays sign, exponent and fraction of the result. 
 
 ## Status
 
