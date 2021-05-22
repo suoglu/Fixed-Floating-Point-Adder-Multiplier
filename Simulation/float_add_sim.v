@@ -37,25 +37,25 @@ module flpa_sim();
   initial
     begin
       //Bug
-      {sign1, exp1, fra1} = 16'h54a5;
-      {sign2, exp2, fra2} = 16'h1cc0;
-      result_expected = 16'h54a5;
-      #100
       {sign1, exp1, fra1} = 16'hc0b0;
       {sign2, exp2, fra2} = 16'h1cc0;
-      result_expected = 16'hc0ad;
+      result_expected = 16'hc0ae;
       #100
       {sign1, exp1, fra1} = 16'h00e0;
       {sign2, exp2, fra2} = 16'h5060;
       result_expected = 16'h5060;
       #100
+      {sign1, exp1, fra1} = 16'h29a8;
+      {sign2, exp2, fra2} = 16'he1f9;
+      result_expected = 16'he1f9;
+      #100
+      {sign1, exp1, fra1} = 16'h54a5;
+      {sign2, exp2, fra2} = 16'h1cc0;
+      result_expected = 16'h54a5;
+      #100
       {sign1, exp1, fra1} = 16'h00b8;
       {sign2, exp2, fra2} = 16'h0080;
       result_expected = 16'h0138;
-      #100
-      {sign1, exp1, fra1} = 16'h29a8;
-      {sign2, exp2, fra2} = 16'he1f9;
-      result_expected = 16'he1f8;
       #100
       //Addition with precision lost
       sign1 = 0;
