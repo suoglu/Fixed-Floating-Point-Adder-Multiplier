@@ -100,7 +100,7 @@ module float_multi(num1, num2, result, overflow, zero, NaN, precisionLost);
   wire [10:0] float2;
   wire [6:0] exSum;
   wire [5:0] exSum_prebais; //exponent sum
-  wire [11:0] float_res; //result
+  wire [11:0] float_res, float_res_preround; //result
   wire [9:0] float_res_fra;
   wire [9:0] dump_res; //Lost precision
   wire [21:0] res_full;
@@ -127,7 +127,6 @@ module float_multi(num1, num2, result, overflow, zero, NaN, precisionLost);
   assign ex1 = ex1_pre + {4'd0, ~|ex1_pre};
   assign ex2 = ex2_pre + {4'd0, ~|ex2_pre};
   assign result = {signR, exR, fraR};
-  assign {float_res, dump_res} = res_full;
   
   //exponentials are added
   assign exSum = exSum_prebais - 7'd15;
@@ -143,6 +142,8 @@ module float_multi(num1, num2, result, overflow, zero, NaN, precisionLost);
   assign exR = (exR_calc | {5{overflow}}) & {5{~zero}};
   assign fraR =  ((subNormal | exSum[6]) ? fraSub : float_res_fra) & {10{~(zero | overflow)}} ;
   assign float_res_fra = (float_res[11]) ? float_res[10:1] : float_res[9:0];
+  assign float_res = float_res_preround + {10'd0,dump_res[9]};
+  assign {float_res_preround, dump_res} = res_full;
   assign res_full = mid[0] + mid[1] + mid[2] + mid[3] + mid[4] + mid[5] + mid[6] + mid[7] + mid[8] + mid[9] + mid[10];
 
   always@* //create mids from fractions
