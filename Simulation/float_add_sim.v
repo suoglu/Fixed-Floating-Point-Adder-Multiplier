@@ -19,14 +19,14 @@ module flpa_sim();
   wire [15:0] result, num1, num2;
   wire overflow, zero;
   wire [9:0] res_fra;
-  wire res_sign, nan;
+  wire res_sign, nan, precisionLost;
   wire [4:0] res_exp;
 
   assign {res_sign, res_exp, res_fra} = result;
   assign num1 = {sign1, exp1, fra1};
   assign num2 = {sign2, exp2, fra2};
 
-  float_adder uut(num1, num2, result, overflow, zero, nan);
+  float_adder uut(num1, num2, result, overflow, zero, nan, precisionLost);
 
   wire correct;
   reg [15:0] result_expected;

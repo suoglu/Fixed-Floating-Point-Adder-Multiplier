@@ -36,7 +36,7 @@ module FixedFloatingAddMulti(clk, rst, sw, leds, btnU, btnL, btnR, btnD, seg, an
   wire overflow_flA, zero_flA, NaN_flA;
   wire overflow_flM, zero_flM, NaN_flM, precisionLost_flM;
   wire overflow_fiA;
-  wire overflow_fiM, precisionLost_fiM;
+  wire overflow_fiM, precisionLost_fiM, precisionLost_flA;
   reg [1:0] op; //MSB for num format LSB for operation
   wire of_FlA, of_FlM, of_FiA, of_FiM; //overflow signals for operations
   wire ssdEnable; //enables decoders
@@ -53,7 +53,7 @@ module FixedFloatingAddMulti(clk, rst, sw, leds, btnU, btnL, btnR, btnD, seg, an
             overflow = overflow_flA;
             zero = zero_flA;
             NaN = NaN_flA;
-            precisionLost = 1'b0;
+            precisionLost = precisionLost_flA;
           end
         Floating_Mult:
           begin
@@ -124,7 +124,7 @@ module FixedFloatingAddMulti(clk, rst, sw, leds, btnU, btnL, btnR, btnD, seg, an
   fixed_adder uut_FiA(num1, num2, result_fiA, overflow_fiA);
   fixed_multi uut_FiM(num1, num2, result_fiM, overflow_fiM, precisionLost_fiM,);
   float_multi uut_FlM(num1, num2, result_flM, overflow_flM, zero_flM, NaN_flM, precisionLost_flM);
-  float_adder uut_FlA(num1, num2, result_flA, overflow_flA, zero_flA, NaN_flA);
+  float_adder uut_FlA(num1, num2, result_flA, overflow_flA, zero_flA, NaN_flA, precisionLost_flA);
 
   //seven segment display
   assign {digit3, digit2, digit1, digit0} = ssdIn;

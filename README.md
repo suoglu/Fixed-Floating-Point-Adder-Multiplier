@@ -97,6 +97,7 @@ Module `float_adder` is an adder module that can add two half-precision floating
 | overflow | O | 1 | Overflow flag |
 | zero | O | 1 | Zero flag |
 | NaN | O | 1 | NaN flag |
+| precisionLost | O | 1 | Precision lost flag |
 
 I: Input  O: Output
 

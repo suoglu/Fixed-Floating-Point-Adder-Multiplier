@@ -327,13 +327,14 @@ module float_multi(num1, num2, result, overflow, zero, NaN, precisionLost);
 endmodule
 
 //float adder adds floating point numbers.
-module float_adder(num1, num2, result, overflow, zero, NaN);
+module float_adder(num1, num2, result, overflow, zero, NaN, precisionLost);
   //Ports
   input [15:0] num1, num2;
   output [15:0] result;
   output overflow; //overflow flag
   output zero; //zero flag
   output NaN; //Not a Number flag
+  output reg precisionLost;
   //Reassing numbers as big and small
   reg [15:0] bigNum, smallNum; //to seperate big and small numbers
   //Decode big and small number
@@ -450,6 +451,19 @@ module float_adder(num1, num2, result, overflow, zero, NaN);
         4'd8: sum_shifted = {sum[1:0],sum_extension[9:2]};
         4'd9: sum_shifted = {sum[0],  sum_extension[9:1]};
         default: sum_shifted = sum_extension;
+      endcase
+      case (shift_am)
+        4'd0: precisionLost = |sum_extension;
+        4'd1: precisionLost = |sum_extension[8:0];
+        4'd2: precisionLost = |sum_extension[7:0];
+        4'd3: precisionLost = |sum_extension[6:0];
+        4'd4: precisionLost = |sum_extension[5:0];
+        4'd5: precisionLost = |sum_extension[4:0];
+        4'd6: precisionLost = |sum_extension[3:0];
+        4'd7: precisionLost = |sum_extension[2:0];
+        4'd8: precisionLost = |sum_extension[1:0];
+        4'd9: precisionLost = |sum_extension[0];
+        default: precisionLost = 1'b0;
       endcase
     end
 
