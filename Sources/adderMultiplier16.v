@@ -365,7 +365,7 @@ module float_adder(num1, num2, result, overflow, zero, NaN, precisionLost);
   assign inf_num = (&num1[14:10] & ~|num1[9:0]) | (&num2[14:10] & ~|num2[9:0]); //check for infinate number
   //Get result
   assign result[15] = big_sig; //result sign same as big sign
-  assign result[14:10] = ((sameSign) ? (big_ex + {4'd0, (~zeroSmall & sum_carry & sameSign)}) : ((neg_exp | (shift_am == 4'd10)) ? 5'd0 : (~shift_am + big_ex + 5'd1))) | {5{overflow}}; //result exponent
+  assign result[14:10] = ((sameSign) ? (big_ex + {4'd0, (~zeroSmall & sum_carry & sameSign)} - {4'd0,({1'b0,result[9:0]} == sum)}) : ((neg_exp | (shift_am == 4'd10)) ? 5'd0 : (~shift_am + big_ex + 5'd1))) | {5{overflow}}; //result exponent
   assign result[9:0] = ((zeroSmall) ? big_fra : ((sameSign) ? ((sum_carry) ? sum[10:1] : sum[9:0]) : ((neg_exp) ? 10'd0 : sum_shifted))) & {10{~overflow}};
 
   //decode numbers
