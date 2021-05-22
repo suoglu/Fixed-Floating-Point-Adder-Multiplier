@@ -142,7 +142,7 @@ module float_multi(num1, num2, result, overflow, zero, NaN, precisionLost);
   assign exR = (exR_calc | {5{overflow}}) & {5{~zero}};
   assign fraR =  ((subNormal | exSum[6]) ? fraSub : float_res_fra) & {10{~(zero | overflow)}} ;
   assign float_res_fra = (float_res[11]) ? float_res[10:1] : float_res[9:0];
-  assign float_res = float_res_preround + {10'd0,dump_res[9]};
+  assign float_res = float_res_preround + {10'd0,dump_res[9]}; //? possibly wrong result due to overflow
   assign {float_res_preround, dump_res} = res_full;
   assign res_full = mid[0] + mid[1] + mid[2] + mid[3] + mid[4] + mid[5] + mid[6] + mid[7] + mid[8] + mid[9] + mid[10];
 
