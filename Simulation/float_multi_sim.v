@@ -46,7 +46,7 @@ module flpm_sim();
       #100
       {sign1, exp1, fra1} = 16'h4489;
       {sign2, exp2, fra2} = 16'h001d;
-      result_expected = 16'h0000;
+      result_expected = 16'h0084;
       #100
       //Multipcation with precision lost
       sign1 = 0;
