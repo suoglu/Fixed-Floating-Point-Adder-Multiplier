@@ -44,6 +44,8 @@ def calculate(multi,val1,val2):
   else:
     res*=1024
   frac_res = int(res)
+  if (res - float(frac_res)) > 0.5:
+    frac_res+=1
   print("Fraction:", hex(frac_res))
   print("Exponent:", hex(exp_res))
   val = ((sign_bin&1) << 15) + ((exp_res&31) << 10) + (frac_res&1023)
