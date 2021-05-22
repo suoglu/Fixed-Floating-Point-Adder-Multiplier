@@ -36,7 +36,7 @@ def calculate(multi,val1,val2):
       exp_res+=1
       if exp_res == 31:
         print("\nOverflow!")
-        quit()
+        return
     res-=1
   if res == 1:
     res = 0
