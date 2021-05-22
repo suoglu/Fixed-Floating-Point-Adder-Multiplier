@@ -19,6 +19,137 @@
  +      d                                              +
  * --------------------------------------------------- */
 
+//Seven Segment Display controller: takes 4 4-bit digits and generates ssd control signals to displays them
+module ssdController4#(parameter CLOCK_PERIOD = 10)(clk, rst, mode, digit3, digit2, digit1, digit0, seg, an);
+  localparam TARGET_PERIOD = 655360; //655.36µs or ~1.526 kHz
+  localparam DIVISION_COUNT = $clog2(TARGET_PERIOD / CLOCK_PERIOD) - 1;
+  input clk, rst;
+  input [3:0] mode; //each bit represents enableing correspond ssd
+  //e.g. mode=0001 means only least significant digit (rightmost, digit0) is going to be enabled
+  input [3:0] digit0, digit1, digit2, digit3;
+  output [6:0] seg;
+  output reg [3:0] an;
+  wire a, b, c, d, e, f, g;
+
+  reg [1:0] state; //shows a diffrent digit every state
+  wire stateClk; //state changes every edge of stateClk
+  reg [DIVISION_COUNT:0] counter; //655.36µs or ~1.526 kHz
+
+  //Some signals for better readability
+  wire [3:0] encode_in;
+  wire [6:0] abcdefg;
+  reg [3:0] digit[3:0];
+
+  assign seg = {g, f, e, d, c, b, a};
+  assign stateClk = counter[DIVISION_COUNT]; //state clock determined by MSB of counter
+
+  //both state and counter will warp 11.. to 00.. at max
+  always@(posedge stateClk or posedge rst) //state transactions
+    begin
+      if(rst)
+        state <= 2'b0;
+      else
+        state <= state + 2'b1;
+    end
+
+  always@(posedge clk or posedge rst) //counter
+    begin
+      if(rst)
+        counter <= {(DIVISION_COUNT+1){1'b0}};
+      else
+        counter <= counter + {{DIVISION_COUNT{1'b0}},1'b1};
+    end
+
+  always@* //anode control
+    begin
+        case(state)
+          2'd0: an = 4'b1110;
+          2'd1: an = 4'b1101;
+          2'd2: an = 4'b1011;
+          2'd3: an = 4'b0111;
+        endcase
+    end
+
+  always@* //collect digits in one block
+    begin
+      digit[0] = digit0;
+      digit[1] = digit1;
+      digit[2] = digit2;
+      digit[3] = digit3;
+    end
+
+  assign {a,b,c,d,e,f,g} = (mode[state]) ? abcdefg : 7'b1111111;
+
+
+  assign encode_in = digit[state];
+
+  ssd_encode encoder(encode_in, abcdefg);
+
+endmodule //Master seven segment display (SSD) control 4 SSDs
+
+//Seven Segment Display controller: takes 2 4-bit digits and generates ssd control signals to displays them
+module ssdController2#(parameter CLOCK_PERIOD = 10)(clk, rst, mode, digit1, digit0, seg, an);
+  localparam TARGET_PERIOD = 655360; //655.36µs or ~1.526 kHz
+  localparam DIVISION_COUNT = $clog2(TARGET_PERIOD / CLOCK_PERIOD) - 1;
+  input clk, rst;
+  input [1:0] mode; //each bit represents enableing correspond ssd
+  //e.g. mode=01 means only least significant digit (rightmost, digit0) is going to be enabled
+  input [3:0] digit0, digit1;
+  wire a, b, c, d, e, f, g;
+  output reg [1:0] an;
+  output [6:0] seg;
+
+  reg state; //shows a diffrent digit every state
+  wire stateClk; //state changes every edge of stateClk
+  reg [15:0] counter; //655.36µs or ~1.526 kHz
+
+  //Some signals for better readability
+  wire [3:0] encode_in;
+  wire [6:0] abcdefg;
+  reg [3:0] digit[1:0];
+
+  assign seg = {g, f, e, d, c, b, a};
+  assign stateClk = counter[DIVISION_COUNT]; //state clock determined by MSB of counter
+
+  always@(posedge stateClk or posedge rst) //state transactions
+    begin
+      if(rst)
+        state <= 1'b0;
+      else
+        state <= ~state;
+    end
+
+  always@(posedge clk or posedge rst) //counter
+    begin
+      if(rst)
+        counter <= {(DIVISION_COUNT+1){1'b0}};
+      else
+        counter <= counter + {{DIVISION_COUNT{1'b0}},1'b1};
+    end
+
+  always@* //anode control
+    begin
+        case(state)
+          1'b0: an = 4'b10;
+          1'b1: an = 2'b01;
+        endcase
+    end
+
+  always@* //collect digits in one block
+    begin
+      digit[0] = digit0;
+      digit[1] = digit1;
+    end
+
+  assign {a,b,c,d,e,f,g} = (mode[state]) ? abcdefg : 7'b1111111;
+
+
+  assign encode_in = digit[state];
+
+  ssd_encode encoder(encode_in, abcdefg);
+
+endmodule //Master seven segment display (SSD) control 2 SSDs
+
 //Converts 4 bit input to hex abcdefg
 module ssd_encode(in, abcdefg);
   parameter zero = 7'b0000001, one = 7'b1001111, two = 7'b0010010;
@@ -52,130 +183,3 @@ module ssd_encode(in, abcdefg);
     end
 
 endmodule // ssdDecode
-
-//Seven Segment Display controller: takes 4 4-bit digits and generates ssd control signals to displays them
-module ssdController4(clk, rst, mode, digit3, digit2, digit1, digit0, seg, an);
-  input clk, rst;
-  input [3:0] mode; //each bit represents enableing correspond ssd
-  //e.g. mode=0001 means only least significant digit (rightmost, digit0) is going to be enabled
-  input [3:0] digit0, digit1, digit2, digit3;
-  output [6:0] seg;
-  wire a, b, c, d, e, f, g;
-  output reg [3:0] an;
-
-  reg [1:0] state; //shows a diffrent digit every state
-  wire stateClk; //state changes every edge of stateClk
-  reg [15:0] counter; //655.36µs or ~1.526 kHz
-
-  //Some signals for better readability
-  wire [3:0] encode_in;
-  wire [6:0] abcdefg;
-  reg [3:0] digit[3:0];
-
-  assign seg = {g, f, e, d, c, b, a};
-  assign stateClk = counter[15]; //state clock determined by MSB of counter
-
-  //both state and counter will warp 11.. to 00.. at max
-  always@(posedge stateClk or posedge rst) //state transactions
-    begin
-      if(rst)
-        state <= 2'b0;
-      else
-        state <= state + 2'b1;
-    end
-
-  always@(posedge clk or posedge rst) //counter
-    begin
-      if(rst)
-        counter <= 16'b0;
-      else
-        counter <= counter + 16'b1;
-    end
-
-  always@* //anode control
-    begin
-        case(state)
-          2'd0: an = 4'b1110;
-          2'd1: an = 4'b1101;
-          2'd2: an = 4'b1011;
-          2'd3: an = 4'b0111;
-        endcase
-    end
-
-  always@* //collect digits in one block
-    begin
-      digit[0] = digit0;
-      digit[1] = digit1;
-      digit[2] = digit2;
-      digit[3] = digit3;
-    end
-
-  assign {a,b,c,d,e,f,g} = (mode[state]) ? abcdefg : 7'b1111111;
-
-
-  assign encode_in = digit[state];
-
-  ssd_encode encoder(encode_in, abcdefg);
-
-endmodule //Master seven segment display (SSD) control 4 SSDs
-
-//Seven Segment Display controller: takes 2 4-bit digits and generates ssd control signals to displays them
-module ssdController2(clk, rst, mode, digit1, digit0, seg, an);
-  input clk, rst;
-  input [1:0] mode; //each bit represents enableing correspond ssd
-  //e.g. mode=01 means only least significant digit (rightmost, digit0) is going to be enabled
-  input [3:0] digit0, digit1;
-  wire a, b, c, d, e, f, g;
-  output reg [1:0] an;
-  output [6:0] seg;
-
-  reg state; //shows a diffrent digit every state
-  wire stateClk; //state changes every edge of stateClk
-  reg [15:0] counter; //655.36µs or ~1.526 kHz
-
-  //Some signals for better readability
-  wire [3:0] encode_in;
-  wire [6:0] abcdefg;
-  reg [3:0] digit[1:0];
-
-  assign seg = {g, f, e, d, c, b, a};
-  assign stateClk = counter[15]; //state clock determined by MSB of counter
-
-  always@(posedge stateClk or posedge rst) //state transactions
-    begin
-      if(rst)
-        state <= 1'b0;
-      else
-        state <= ~state;
-    end
-
-  always@(posedge clk or posedge rst) //counter
-    begin
-      if(rst)
-        counter <= 16'b0;
-      else
-        counter <= counter + 16'b1;
-    end
-
-  always@* //anode control
-    begin
-        case(state)
-          1'b0: an = 4'b10;
-          1'b1: an = 2'b01;
-        endcase
-    end
-
-  always@* //collect digits in one block
-    begin
-      digit[0] = digit0;
-      digit[1] = digit1;
-    end
-
-  assign {a,b,c,d,e,f,g} = (mode[state]) ? abcdefg : 7'b1111111;
-
-
-  assign encode_in = digit[state];
-
-  ssd_encode encoder(encode_in, abcdefg);
-
-endmodule //Master seven segment display (SSD) control 2 SSDs

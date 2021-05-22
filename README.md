@@ -163,9 +163,9 @@ Floating point multiplier module simulated using [`float_multi_sim.v`](Simulatio
   * System will calculate results for all of the modules. Shown output can be chosen via `Operator buttons`.
   * To initiate a new calculation press `Reset/New calculation` button.
 
-## Helper Script
+## Helper Scripts
 
-A python 3 script, [binary16_verfiy.py](Sources/binary16_verfiy.py), added to help verfication. Script can be used to calculate operation results for binary16 format. Script asks sign, exponent and fraction seperately and displays sign, exponent and fraction of the result.
+Helper python 3 scripts are added to help verfication. They can be found at [Scripts](Scripts/) directory. Script can be used to calculate operation results for binary16 format or decode 16 bit binary16.
 
 ## Status
 
@@ -175,6 +175,12 @@ A python 3 script, [binary16_verfiy.py](Sources/binary16_verfiy.py), added to he
 * Floating Point Adder: 20 May 2021, with [Vivado Simulator](https://www.xilinx.com/products/design-tools/vivado/simulator.html).
 * Floating Point Multiplier: 20 May 2021, with [Vivado Simulator](https://www.xilinx.com/products/design-tools/vivado/simulator.html).
 
+**Test:**
+
+* Fixed Point Modules: 22 May 2021, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual)
+* Floating Point Adder: 22 May 2021, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual)
+* Floating Point Multiplier: 22 May 2021, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual)
+
 ## Issues
 
-* Non of the modules are tested on FPGA yet
+* Minor bug in floating modules. Experienced in precision. Results incorrect (but close) results.

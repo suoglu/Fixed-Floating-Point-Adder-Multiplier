@@ -1,11 +1,20 @@
-//Yigit Suoglu
-//Contains top module of implementation
+/* ----------------------------------------------------- *
+ * Title       : FixFlo Adder Multiplier Modules         *
+ * Project     : Fixed Floating Point Adder Multiplier   *
+ * ----------------------------------------------------- *
+ * File        : TopModule.v                             *
+ * Author      : Yigit Suoglu                            *
+ * Last Edit   : 22/05/2021                              *
+ * ----------------------------------------------------- *
+ * Description : Top module implementation for adder     *
+ *               multiplier modules                      *
+ * ----------------------------------------------------- */
 `timescale 1ns / 1ps
-`include "Sources/adder-multiplier.v"
-`include "Test/btn_debouncer.v"
-`include "Test/ssd_util.v"
+// `include "Sources/adderMultiplier16.v"
+// `include "Test/btn_debouncer.v"
+// `include "Test/ssd_util.v"
 
-module FixedFloatingAddMulti(clk, rst, sw, leds, btnU, btnL, btnR, btnD,seg, an0, an1, an2, an3);
+module FixedFloatingAddMulti(clk, rst, sw, leds, btnU, btnL, btnR, btnD, seg, an);
   localparam IDLE = 2'b0, WAIT1 = 2'b1, WAIT2 = 2'b10, RESULT = 2'b11;
   localparam Floating_Add = 2'b0;
   localparam Floating_Mult = 2'b1;
@@ -18,7 +27,7 @@ module FixedFloatingAddMulti(clk, rst, sw, leds, btnU, btnL, btnR, btnD,seg, an0
   wire FlA, FlM, FiA, FiM; //Fi: fixed, Fl: floating, A: add, M: multiply (debounced)
   output [15:0] leds;
   output [6:0] seg;
-  output an0, an1, an2, an3; //SSD anodes
+  output [3:0] an;
   wire commonBTN; //senstive to all buttons (except rst)
   wire [15:0] result_flA, result_flM, result_fiA, result_fiM, ssdIn;
   reg [15:0] num1, num2, ssdInRESULT;
@@ -31,6 +40,7 @@ module FixedFloatingAddMulti(clk, rst, sw, leds, btnU, btnL, btnR, btnD,seg, an0
   reg [1:0] op; //MSB for num format LSB for operation
   wire of_FlA, of_FlM, of_FiA, of_FiM; //overflow signals for operations
   wire ssdEnable; //enables decoders
+  wire [3:0] digit0, digit1, digit2, digit3;
 
   //Switch outputs
   assign ssdIn = (&state) ? ssdInRESULT : sw;
@@ -74,7 +84,7 @@ module FixedFloatingAddMulti(clk, rst, sw, leds, btnU, btnL, btnR, btnD,seg, an0
     end
   
   //control signals
-  assign ssdEnable = ~|state;
+  assign ssdEnable = |state;
   always@(posedge clk or posedge rst)
     begin
       if(rst)
@@ -83,7 +93,7 @@ module FixedFloatingAddMulti(clk, rst, sw, leds, btnU, btnL, btnR, btnD,seg, an0
         end
       else
         begin
-            op <= (&state & commonBTN) ? {(FiA | FiM), (FiM | FlM)} : op;
+            op <= (commonBTN) ? {(FiA | FiM), (FiM | FlM)} : op;
         end
     end
   
@@ -117,7 +127,8 @@ module FixedFloatingAddMulti(clk, rst, sw, leds, btnU, btnL, btnR, btnD,seg, an0
   float_adder uut_FlA(num1, num2, result_flA, overflow_flA, zero_flA, NaN_flA);
 
   //seven segment display
-  ssdController4 ssdcntrl(clk, rst, {4{ssdEnable}}, ssdIn[15:12], ssdIn[11:8], ssdIn[7:4], ssdIn[3:0], seg, {an3, an2, an1, an0});
+  assign {digit3, digit2, digit1, digit0} = ssdIn;
+  ssdController4 ssdCntr(clk, rst, {4{ssdEnable}}, digit3, digit2, digit1, digit0, seg, an);
   
   //get numbers
   always@(posedge clk or posedge rst)
