@@ -3,6 +3,8 @@
 #* Helper script for binary16 *#
 #*  Yigit Suoglu, 20/05/2021  *#
 
+import sys
+
 def calculate(multi,val1,val2):
   if multi:
     print("\nMultiplying...\n")
@@ -52,7 +54,10 @@ def calculate(multi,val1,val2):
 
 print("This script calculates the result of binary16 operation.")
 
-hex1 = input("\nFirst operand: ")
+if(len(sys.argv)>1):
+  hex1 = sys.argv[1]
+else:
+  hex1 = input("\nFirst operand: ")
 hex1 = int(hex1, 16)
 sign1 = (hex1 >>15) & 1
 frac1 = hex1&1023
@@ -82,8 +87,10 @@ if exp1 == 16:
   else:
     print("Operand 1 is a NaN!")
   quit()
-
-hex2 = input("\nSecond operand: ")
+if(len(sys.argv)>2):
+  hex2 = sys.argv[2]
+else:
+  hex2 = input("\nSecond operand: ")
 hex2 = int(hex2, 16)
 sign2 = (hex2 >>15) & 1
 frac2 = hex2&1023
