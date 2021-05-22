@@ -451,12 +451,12 @@ module float_adder(num1, num2, result, overflow, zero, NaN, precisionLost);
         4'd7: {shifted_small_float,small_extension} = {small_float,3'd0};
         4'd8: {shifted_small_float,small_extension} = {small_float,2'd0};
         4'd9: {shifted_small_float,small_extension} = {small_float,1'd0};
-        4'd10: {shifted_small_float,small_extension} = (small_float >> 1);
-        4'd11: {shifted_small_float,small_extension} = (small_float >> 2);
-        4'd12: {shifted_small_float,small_extension} = (small_float >> 3);
-        4'd13: {shifted_small_float,small_extension} = (small_float >> 4);
-        4'd14: {shifted_small_float,small_extension} = (small_float >> 5);
-        4'd15: {shifted_small_float,small_extension} = (small_float >> 6);
+        4'd10: {shifted_small_float,small_extension} = small_float;
+        4'd11: {shifted_small_float,small_extension} = small_float[10:1];
+        4'd12: {shifted_small_float,small_extension} = small_float[10:2];
+        4'd13: {shifted_small_float,small_extension} = small_float[10:3];
+        4'd14: {shifted_small_float,small_extension} = small_float[10:4];
+        4'd15: {shifted_small_float,small_extension} = small_float[10:5];
       endcase
     end
 
