@@ -19,9 +19,9 @@ module flpm_sim();
   reg [4:0] exp1, exp2;
   wire [15:0] result, num1, num2;
   wire overflow, zero, precisionLost;
-  wire [9:0] res_fra;
-  wire res_sign, nan;
-  wire [4:0] res_exp;
+  wire [9:0] res_fra, expected_fra;
+  wire res_sign, nan, expected_sign;
+  wire [4:0] res_exp, expected_exp;
   reg [15:0] result_expected;
 
   assign {res_sign, res_exp, res_fra} = result;
@@ -32,6 +32,7 @@ module flpm_sim();
   wire correct;
 
   assign correct = result == result_expected;
+  assign {expected_sign,expected_exp,expected_fra} = result_expected;
 
   initial
     begin//Bug
