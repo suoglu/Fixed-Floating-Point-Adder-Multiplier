@@ -344,7 +344,7 @@ module float_adder(num1, num2, result, overflow, zero, NaN, precisionLost);
   wire big_sig, small_sig; //to hold signs
   wire [10:0] big_float, small_float; //to hold as float number with integer
   reg [10:0] sign_small_float, shifted_small_float; //preparing small float
-  wire [3:0] ex_diff; //difrence between exponentials
+  wire [4:0] ex_diff; //difrence between exponentials
   reg [9:0] sum_shifted; //Shift fraction part of sum
   reg [3:0] shift_am;
   wire neg_exp;
@@ -441,22 +441,29 @@ module float_adder(num1, num2, result, overflow, zero, NaN, precisionLost);
   always@* 
     begin
       case (ex_diff)
-        4'd0: {shifted_small_float,small_extension} = {small_float,10'd0};
-        4'd1: {shifted_small_float,small_extension} = {small_float,9'd0};
-        4'd2: {shifted_small_float,small_extension} = {small_float,8'd0};
-        4'd3: {shifted_small_float,small_extension} = {small_float,7'd0};
-        4'd4: {shifted_small_float,small_extension} = {small_float,6'd0};
-        4'd5: {shifted_small_float,small_extension} = {small_float,5'd0};
-        4'd6: {shifted_small_float,small_extension} = {small_float,4'd0};
-        4'd7: {shifted_small_float,small_extension} = {small_float,3'd0};
-        4'd8: {shifted_small_float,small_extension} = {small_float,2'd0};
-        4'd9: {shifted_small_float,small_extension} = {small_float,1'd0};
-        4'd10: {shifted_small_float,small_extension} = small_float;
-        4'd11: {shifted_small_float,small_extension} = small_float[10:1];
-        4'd12: {shifted_small_float,small_extension} = small_float[10:2];
-        4'd13: {shifted_small_float,small_extension} = small_float[10:3];
-        4'd14: {shifted_small_float,small_extension} = small_float[10:4];
-        4'd15: {shifted_small_float,small_extension} = small_float[10:5];
+        5'h0: {shifted_small_float,small_extension} = {small_float,10'd0};
+        5'h1: {shifted_small_float,small_extension} = {small_float,9'd0};
+        5'h2: {shifted_small_float,small_extension} = {small_float,8'd0};
+        5'h3: {shifted_small_float,small_extension} = {small_float,7'd0};
+        5'h4: {shifted_small_float,small_extension} = {small_float,6'd0};
+        5'h5: {shifted_small_float,small_extension} = {small_float,5'd0};
+        5'h6: {shifted_small_float,small_extension} = {small_float,4'd0};
+        5'h7: {shifted_small_float,small_extension} = {small_float,3'd0};
+        5'h8: {shifted_small_float,small_extension} = {small_float,2'd0};
+        5'h9: {shifted_small_float,small_extension} = {small_float,1'd0};
+        5'ha: {shifted_small_float,small_extension} = small_float;
+        5'hb: {shifted_small_float,small_extension} = small_float[10:1];
+        5'hc: {shifted_small_float,small_extension} = small_float[10:2];
+        5'hd: {shifted_small_float,small_extension} = small_float[10:3];
+        5'he: {shifted_small_float,small_extension} = small_float[10:4];
+        5'hf: {shifted_small_float,small_extension} = small_float[10:5];
+        5'h10: {shifted_small_float,small_extension} = small_float[10:5];
+        5'h11: {shifted_small_float,small_extension} = small_float[10:6];
+        5'h12: {shifted_small_float,small_extension} = small_float[10:7];
+        5'h13: {shifted_small_float,small_extension} = small_float[10:8];
+        5'h14: {shifted_small_float,small_extension} = small_float[10:9];
+        5'h15: {shifted_small_float,small_extension} = small_float[10];
+        5'h16: {shifted_small_float,small_extension} = 0;
       endcase
     end
 
