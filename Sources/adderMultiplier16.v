@@ -357,6 +357,8 @@ module float_adder(num1, num2, result, overflow, zero, NaN, precisionLost);
   wire sameSign;
   wire zeroSmall;
   wire inf_num; //at least on of the operands is inf.
+
+  wire [4:0] res_exp_same_s, res_exp_diff_s;
   
   //Flags
   assign zero = (num1[14:0] == num2[14:0]) & (~num1[15] == num2[15]);
@@ -365,7 +367,9 @@ module float_adder(num1, num2, result, overflow, zero, NaN, precisionLost);
   assign inf_num = (&num1[14:10] & ~|num1[9:0]) | (&num2[14:10] & ~|num2[9:0]); //check for infinate number
   //Get result
   assign result[15] = big_sig; //result sign same as big sign
-  assign result[14:10] = ((sameSign) ? (big_ex + {4'd0, (~zeroSmall & sum_carry & sameSign)} - {4'd0,({1'b0,result[9:0]} == sum)}) : ((neg_exp | (shift_am == 4'd10)) ? 5'd0 : (~shift_am + big_ex + 5'd1))) | {5{overflow}}; //result exponent
+  assign res_exp_same_s = big_ex + {4'd0, (~zeroSmall & sum_carry & sameSign)} - {4'd0,({1'b0,result[9:0]} == sum)};
+  assign res_exp_diff_s = (neg_exp | (shift_am == 4'd10)) ? 5'd0 : (~shift_am + big_ex + 5'd1);
+  assign result[14:10] = ((sameSign) ? res_exp_same_s : res_exp_diff_s) | {5{overflow}}; //result exponent
   assign result[9:0] = ((zeroSmall) ? big_fra : ((sameSign) ? ((sum_carry) ? sum[10:1] : sum[9:0]) : ((neg_exp) ? 10'd0 : sum_shifted))) & {10{~overflow}};
 
   //decode numbers
@@ -388,52 +392,18 @@ module float_adder(num1, num2, result, overflow, zero, NaN, precisionLost);
   always@*
     begin
       casex(sum)
-        11'b1xxxxxxxxxx:
-          begin
-            shift_am = 4'd0;
-          end
-        11'b01xxxxxxxxx:
-          begin
-            shift_am = 4'd1;
-          end
-        11'b001xxxxxxxx:
-          begin
-            shift_am = 4'd2;
-          end
-        11'b0001xxxxxxx:
-          begin
-            shift_am = 4'd3;
-          end
-        11'b00001xxxxxx:
-          begin
-            shift_am = 4'd4;
-          end
-        11'b000001xxxxx:
-          begin
-            shift_am = 4'd5;
-          end
-        11'b0000001xxxx:
-          begin
-            shift_am = 4'd6;
-          end
-        11'b00000001xxx:
-          begin
-            shift_am = 4'd7;
-          end
-        11'b000000001xx:
-          begin
-            shift_am = 4'd8;
-          end
-        11'b0000000001x:
-          begin
-            shift_am = 4'd9;
-          end
-        default:
-          begin
-            shift_am = 4'd10;
-          end
+        11'b1xxxxxxxxxx: shift_am = 4'd0;
+        11'b01xxxxxxxxx: shift_am = 4'd1;
+        11'b001xxxxxxxx: shift_am = 4'd2;
+        11'b0001xxxxxxx: shift_am = 4'd3;
+        11'b00001xxxxxx: shift_am = 4'd4;
+        11'b000001xxxxx: shift_am = 4'd5;
+        11'b0000001xxxx: shift_am = 4'd6;
+        11'b00000001xxx: shift_am = 4'd7;
+        11'b000000001xx: shift_am = 4'd8;
+        11'b0000000001x: shift_am = 4'd9;
+        default: shift_am = 4'd10;
       endcase
-      
     end
 
   //Shift result for sub.
