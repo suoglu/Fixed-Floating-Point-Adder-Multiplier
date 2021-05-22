@@ -89,7 +89,6 @@ module float_multi(num1, num2, result, overflow, zero, NaN, precisionLost);
   output zero; //zero flag
   output NaN; //Not a Number flag
   output precisionLost;
-  wire overflow_nomask;//overflow flag
   //Decode numbers
   wire sign1, sign2, signR; //hold signs
   wire [4:0] ex1, ex2, exR; //hold exponents
@@ -99,7 +98,8 @@ module float_multi(num1, num2, result, overflow, zero, NaN, precisionLost);
   reg [9:0] fraSub;
   wire [20:0] float1;
   wire [10:0] float2;
-  wire [5:0] exSum, exSum_prebais; //exponent sum
+  wire [6:0] exSum;
+  wire [5:0] exSum_prebais; //exponent sum
   wire [11:0] float_res; //result
   wire [9:0] dump_res; //Lost precision
   wire [21:0] res_full;
@@ -108,11 +108,10 @@ module float_multi(num1, num2, result, overflow, zero, NaN, precisionLost);
   wire NsubNormal;
 
   //Flags
-  assign zero = (~(|num1[14:0] & |num2[14:0]) | (~NsubNormal & ((fraSub == 10'd0) | ((exSubCor > exSum[4:0]) & |{ex1_pre,ex2_pre})))) | (precisionLost & overflow_nomask);
+  assign zero = (~(|num1[14:0] & |num2[14:0]) | (~NsubNormal & ((fraSub == 10'd0) | ((exSubCor > exSum[4:0]) & |{ex1_pre,ex2_pre})))) | (precisionLost & overflow);
   assign NaN = (&num1[14:10] & |num1[9:0]) | (&num2[14:10] & |num2[9:0]);
   assign inf_num = (&num1[14:10] & ~|num1[9:0]) | (&num2[14:10] & ~|num2[9:0]); //check for infinate number
-  assign overflow_nomask = inf_num | exSum[5];
-  assign overflow = ~zero & overflow_nomask;
+  assign overflow = inf_num | (~exSum[6] & exSum[5]);
   assign NsubNormal = |float_res[11:10];
   assign precisionLost = |dump_res | (exSum_prebais < 6'd15);
   
@@ -125,7 +124,7 @@ module float_multi(num1, num2, result, overflow, zero, NaN, precisionLost);
   assign res_full = {float_res, dump_res};
   
   //exponentials are added
-  assign exSum = exSum_prebais - 6'd15;
+  assign exSum = exSum_prebais - 7'd15;
   assign exSum_prebais = {1'b0,ex1} + {1'b0,ex2};
 
   //Get floating numbers
@@ -135,8 +134,8 @@ module float_multi(num1, num2, result, overflow, zero, NaN, precisionLost);
   //Calculate result
   assign signR = (sign1 ^ sign2);
   assign exR_calc = exSum[4:0]+ {4'd0, float_res[11]} + (~exSubCor & {5{~NsubNormal}}) + {4'd0, ~NsubNormal};
-  assign exR = ((overflow_nomask) ? 5'b11111 : exR_calc) & {5{~zero}};
-  assign fraR = (zero | overflow_nomask) ? 10'd0 : ((NsubNormal | ~|{ex1_pre,ex2_pre}) ? ((float_res[11]) ? float_res[10:1] : float_res[9:0]) : fraSub);
+  assign exR = ((overflow) ? 5'b11111 : exR_calc) & {5{~zero}};
+  assign fraR = (zero | overflow) ? 10'd0 : ((NsubNormal | ~|{ex1_pre,ex2_pre}) ? ((float_res[11]) ? float_res[10:1] : float_res[9:0]) : fraSub);
   assign {float_res, dump_res} = mid[0] + mid[1] + mid[2] + mid[3] + mid[4] + mid[5] + mid[6] + mid[7] + mid[8] + mid[9] + mid[10];
 
   always@* //create mids from fractions
