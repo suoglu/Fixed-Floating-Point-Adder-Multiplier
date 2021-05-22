@@ -347,6 +347,9 @@ module float_adder(num1, num2, result, overflow, zero, NaN);
   reg [9:0] sum_shifted; //Shift fraction part of sum
   reg [3:0] shift_am;
   wire neg_exp;
+  //Extensions for higher precision
+  reg [9:0] small_extension;
+  wire [9:0] sum_extension;
 
   wire [10:0] sum; //sum of numbers with integer parts
   wire sum_carry;
@@ -377,6 +380,7 @@ module float_adder(num1, num2, result, overflow, zero, NaN);
   assign small_float = {|small_ex_pre, small_fra};
   assign ex_diff = big_ex - small_ex; //diffrence between exponents
   assign {sum_carry, sum} = sign_small_float + big_float; //add numbers
+  assign sum_extension = small_extension;
 
   //Get shift amount for subtraction
   assign neg_exp = (big_ex < shift_am);
@@ -435,17 +439,17 @@ module float_adder(num1, num2, result, overflow, zero, NaN);
   always@* 
     begin
       case (shift_am)
-        4'd0: sum_shifted = sum[9:0];
-        4'd1: sum_shifted = (sum[9:0] << 1);
-        4'd2: sum_shifted = (sum[9:0] << 2);
-        4'd3: sum_shifted = (sum[9:0] << 3);
-        4'd4: sum_shifted = (sum[9:0] << 4);
-        4'd5: sum_shifted = (sum[9:0] << 5);
-        4'd6: sum_shifted = (sum[9:0] << 6);
-        4'd7: sum_shifted = (sum[9:0] << 7);
-        4'd8: sum_shifted = (sum[9:0] << 8);
-        4'd9: sum_shifted = (sum[9:0] << 9);
-        default: sum_shifted = (sum[9:0] << 10);
+        4'd0: sum_shifted =  sum[9:0];
+        4'd1: sum_shifted = {sum[8:0],sum_extension[9]};
+        4'd2: sum_shifted = {sum[7:0],sum_extension[9:8]};
+        4'd3: sum_shifted = {sum[6:0],sum_extension[9:7]};
+        4'd4: sum_shifted = {sum[5:0],sum_extension[9:6]};
+        4'd5: sum_shifted = {sum[4:0],sum_extension[9:5]};
+        4'd6: sum_shifted = {sum[3:0],sum_extension[9:4]};
+        4'd7: sum_shifted = {sum[2:0],sum_extension[9:3]};
+        4'd8: sum_shifted = {sum[1:0],sum_extension[9:2]};
+        4'd9: sum_shifted = {sum[0],  sum_extension[9:1]};
+        default: sum_shifted = sum_extension;
       endcase
     end
 
@@ -453,18 +457,22 @@ module float_adder(num1, num2, result, overflow, zero, NaN);
   always@* 
     begin
       case (ex_diff)
-        4'd0: shifted_small_float = small_float;
-        4'd1: shifted_small_float = (small_float >> 1);
-        4'd2: shifted_small_float = (small_float >> 2);
-        4'd3: shifted_small_float = (small_float >> 3);
-        4'd4: shifted_small_float = (small_float >> 4);
-        4'd5: shifted_small_float = (small_float >> 5);
-        4'd6: shifted_small_float = (small_float >> 6);
-        4'd7: shifted_small_float = (small_float >> 7);
-        4'd8: shifted_small_float = (small_float >> 8);
-        4'd9: shifted_small_float = (small_float >> 9);
-        4'd10: shifted_small_float = (small_float >> 10);
-        default: shifted_small_float = 11'b0;
+        4'd0: {shifted_small_float,small_extension} = {small_float,10'd0};
+        4'd1: {shifted_small_float,small_extension} = {small_float,9'd0};
+        4'd2: {shifted_small_float,small_extension} = {small_float,8'd0};
+        4'd3: {shifted_small_float,small_extension} = {small_float,7'd0};
+        4'd4: {shifted_small_float,small_extension} = {small_float,6'd0};
+        4'd5: {shifted_small_float,small_extension} = {small_float,5'd0};
+        4'd6: {shifted_small_float,small_extension} = {small_float,4'd0};
+        4'd7: {shifted_small_float,small_extension} = {small_float,3'd0};
+        4'd8: {shifted_small_float,small_extension} = {small_float,2'd0};
+        4'd9: {shifted_small_float,small_extension} = {small_float,1'd0};
+        4'd10: {shifted_small_float,small_extension} = (small_float >> 1);
+        4'd11: {shifted_small_float,small_extension} = (small_float >> 2);
+        4'd12: {shifted_small_float,small_extension} = (small_float >> 3);
+        4'd13: {shifted_small_float,small_extension} = (small_float >> 4);
+        4'd14: {shifted_small_float,small_extension} = (small_float >> 5);
+        4'd15: {shifted_small_float,small_extension} = (small_float >> 6);
       endcase
     end
 
