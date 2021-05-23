@@ -94,8 +94,10 @@ module float_multi(num1, num2, result, overflow, zero, NaN, precisionLost);
   wire [4:0] ex1, ex2, exR; //hold exponents
   wire [4:0] ex1_pre, ex2_pre, exR_calc; //hold exponents
   reg [4:0] exSubCor;
+  wire [4:0] exSum_fault;
+  wire ex_cannot_correct;
   wire [9:0] fra1, fra2, fraR; //hold fractions
-  reg [9:0] fraSub;
+  reg [9:0] fraSub, fraSub_corrected;
   wire [20:0] float1;
   wire [10:0] float2;
   wire exSum_sign;
@@ -113,7 +115,8 @@ module float_multi(num1, num2, result, overflow, zero, NaN, precisionLost);
 
   //Partial flags
   assign zero_num_in = ~(|num1[14:0] & |num2[14:0]);
-  assign zero_calculated = subNormal & ((fraSub == 10'd0) | ((exSubCor > exSum[4:0]) & |{ex1_pre,ex2_pre}));
+  assign zero_calculated = (subNormal & (fraSub == 10'd0)) | (exSum_sign & (~|res_full[20:11]));
+  assign ex_cannot_correct = {1'b0,exSubCor} > exSum_abs; //?: or >=
 
   //Flags
   assign zero = zero_num_in | zero_calculated;
@@ -142,13 +145,14 @@ module float_multi(num1, num2, result, overflow, zero, NaN, precisionLost);
 
   //Calculate result
   assign signR = (sign1 ^ sign2);
-  assign exR_calc = exSum[4:0]+ {4'd0, float_res[11]} + (~exSubCor & {5{subNormal}}) + {4'd0, subNormal};
-  assign exR = (exR_calc | {5{overflow}}) & {5{~(zero | exSum_sign)}};
-  assign fraR = ((exSum_sign) ? res_full[20:11] :((subNormal) ? fraSub : float_res_fra)) & {10{~(zero | overflow)}} ;
+  assign exR_calc = exSum[4:0] + {4'd0, float_res[11]} + (~exSubCor & {5{subNormal}}) + {4'd0, subNormal};
+  assign exR = (exR_calc | {5{overflow}}) & {5{~(zero | exSum_sign | ex_cannot_correct)}};
+  assign fraR = ((exSum_sign) ? res_full[20:11] :((subNormal) ? fraSub_corrected : float_res_fra)) & {10{~(zero | overflow)}} ;
   assign float_res_fra = (float_res[11]) ? float_res[10:1] : float_res[9:0];
-  assign float_res = float_res_preround + {10'd0,dump_res[9]}; //? possibly wrong result due to overflow
+  assign float_res = float_res_preround + {10'd0,dump_res[9]}; //? possibly generates wrong result due to overflow
   assign {float_res_preround, dump_res} = res_full_preshift;
   assign res_full_preshift = mid[0] + mid[1] + mid[2] + mid[3] + mid[4] + mid[5] + mid[6] + mid[7] + mid[8] + mid[9] + mid[10];
+  assign exSum_fault = exSubCor - exSum_abs[4:0];
   always@*
     begin
       if(exSum_sign)
@@ -173,6 +177,25 @@ module float_multi(num1, num2, result, overflow, zero, NaN, precisionLost);
         endcase
       else
         res_full = res_full_preshift;
+    end
+  always@*
+    begin
+      if(ex_cannot_correct)
+        case(exSum_fault)
+          5'h0: fraSub_corrected = fraSub;
+          5'h1: fraSub_corrected = (fraSub >> 1);
+          5'h2: fraSub_corrected = (fraSub >> 2);
+          5'h3: fraSub_corrected = (fraSub >> 3);
+          5'h4: fraSub_corrected = (fraSub >> 4);
+          5'h5: fraSub_corrected = (fraSub >> 5);
+          5'h6: fraSub_corrected = (fraSub >> 6);
+          5'h7: fraSub_corrected = (fraSub >> 7);
+          5'h8: fraSub_corrected = (fraSub >> 8);
+          5'h9: fraSub_corrected = (fraSub >> 9);
+          default: fraSub_corrected = 10'h0;
+        endcase
+      else
+        fraSub_corrected = fraSub;
     end
 
   always@* //create mids from fractions

@@ -35,7 +35,15 @@ module flpm_sim();
   assign {expected_sign,expected_exp,expected_fra} = result_expected;
 
   initial
-    begin//Bug
+    begin//Buggy cases
+      {sign1, exp1, fra1} = 16'h4689;
+      {sign2, exp2, fra2} = 16'h0025;
+      result_expected = 16'h00f2;
+      #100
+      {sign1, exp1, fra1} = 16'h4489;
+      {sign2, exp2, fra2} = 16'h001d;
+      result_expected = 16'h0084;
+      #100
       {sign1, exp1, fra1} = 16'h1234;
       {sign2, exp2, fra2} = 16'h9876;
       result_expected = 16'h801b;
@@ -43,10 +51,6 @@ module flpm_sim();
       {sign1, exp1, fra1} = 16'h8216;
       {sign2, exp2, fra2} = 16'h20be;
       result_expected = 16'h8004;
-      #100
-      {sign1, exp1, fra1} = 16'h4489;
-      {sign2, exp2, fra2} = 16'h001d;
-      result_expected = 16'h0084;
       #100
       //Multipcation with precision lost
       sign1 = 0;
