@@ -173,8 +173,8 @@ Helper python 3 scripts are added to help verfication. They can be found at [Scr
 **Simulation:**
 
 * Fixed Point Modules: 9 January 2021, with [Vivado Simulator](https://www.xilinx.com/products/design-tools/vivado/simulator.html).
-* Floating Point Adder: 20 May 2021, with [Vivado Simulator](https://www.xilinx.com/products/design-tools/vivado/simulator.html).
-* Floating Point Multiplier: 20 May 2021, with [Vivado Simulator](https://www.xilinx.com/products/design-tools/vivado/simulator.html).
+* Floating Point Adder: 22 May 2021, with [Vivado Simulator](https://www.xilinx.com/products/design-tools/vivado/simulator.html).
+* Floating Point Multiplier: 23 May 2021, with [Vivado Simulator](https://www.xilinx.com/products/design-tools/vivado/simulator.html).
 
 **Test:**
 
@@ -184,4 +184,4 @@ Helper python 3 scripts are added to help verfication. They can be found at [Scr
 
 ## Issues
 
-* Minor bug in floating modules. Experienced in precision. Results incorrect (but close) results.
+* Minor bug in floating multiplier module. Some of the results incorrect. See [issue](https://gitlab.com/suoglu/Fixed-Floating-Point-Adder-Multiplier/-/issues/4) #4.
