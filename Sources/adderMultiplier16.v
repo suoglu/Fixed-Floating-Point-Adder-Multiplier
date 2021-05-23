@@ -98,12 +98,14 @@ module float_multi(num1, num2, result, overflow, zero, NaN, precisionLost);
   reg [9:0] fraSub;
   wire [20:0] float1;
   wire [10:0] float2;
+  wire exSum_sign;
   wire [6:0] exSum;
-  wire [5:0] exSum_prebais; //exponent sum
+  wire [5:0] exSum_prebais, exSum_abs; //exponent sum
   wire [11:0] float_res, float_res_preround; //result
   wire [9:0] float_res_fra;
   wire [9:0] dump_res; //Lost precision
-  wire [21:0] res_full;
+  reg [21:0] res_full;
+  wire [21:0] res_full_preshift;
   reg [20:0] mid[10:0];
   wire inf_num; //at least on of the operands is inf.
   wire subNormal;
@@ -131,6 +133,8 @@ module float_multi(num1, num2, result, overflow, zero, NaN, precisionLost);
   //exponentials are added
   assign exSum = exSum_prebais - 7'd15;
   assign exSum_prebais = {1'b0,ex1} + {1'b0,ex2};
+  assign exSum_abs = (exSum_sign) ? (~exSum[5:0] + 6'd1) : exSum[5:0];
+  assign exSum_sign = exSum[6];
 
   //Get floating numbers
   assign float1 = {|ex1_pre, fra1, 10'd0};
@@ -139,12 +143,37 @@ module float_multi(num1, num2, result, overflow, zero, NaN, precisionLost);
   //Calculate result
   assign signR = (sign1 ^ sign2);
   assign exR_calc = exSum[4:0]+ {4'd0, float_res[11]} + (~exSubCor & {5{subNormal}}) + {4'd0, subNormal};
-  assign exR = (exR_calc | {5{overflow}}) & {5{~zero}};
-  assign fraR =  ((subNormal | exSum[6]) ? fraSub : float_res_fra) & {10{~(zero | overflow)}} ;
+  assign exR = (exR_calc | {5{overflow}}) & {5{~(zero | exSum_sign)}};
+  assign fraR = ((exSum_sign) ? res_full[20:11] :((subNormal) ? fraSub : float_res_fra)) & {10{~(zero | overflow)}} ;
   assign float_res_fra = (float_res[11]) ? float_res[10:1] : float_res[9:0];
   assign float_res = float_res_preround + {10'd0,dump_res[9]}; //? possibly wrong result due to overflow
-  assign {float_res_preround, dump_res} = res_full;
-  assign res_full = mid[0] + mid[1] + mid[2] + mid[3] + mid[4] + mid[5] + mid[6] + mid[7] + mid[8] + mid[9] + mid[10];
+  assign {float_res_preround, dump_res} = res_full_preshift;
+  assign res_full_preshift = mid[0] + mid[1] + mid[2] + mid[3] + mid[4] + mid[5] + mid[6] + mid[7] + mid[8] + mid[9] + mid[10];
+  always@*
+    begin
+      if(exSum_sign)
+        case(exSum_abs)
+          6'h0: res_full = res_full_preshift;
+          6'h1: res_full = (res_full_preshift >> 1);
+          6'h2: res_full = (res_full_preshift >> 2);
+          6'h3: res_full = (res_full_preshift >> 3);
+          6'h4: res_full = (res_full_preshift >> 4);
+          6'h5: res_full = (res_full_preshift >> 5);
+          6'h6: res_full = (res_full_preshift >> 6);
+          6'h7: res_full = (res_full_preshift >> 7);
+          6'h8: res_full = (res_full_preshift >> 8);
+          6'h9: res_full = (res_full_preshift >> 9);
+          6'ha: res_full = (res_full_preshift >> 10);
+          6'hb: res_full = (res_full_preshift >> 11);
+          6'hc: res_full = (res_full_preshift >> 12);
+          6'hd: res_full = (res_full_preshift >> 13);
+          6'he: res_full = (res_full_preshift >> 14);
+          6'hf: res_full = (res_full_preshift >> 15);
+          default: res_full = (res_full_preshift >> 16);
+        endcase
+      else
+        res_full = res_full_preshift;
+    end
 
   always@* //create mids from fractions
     begin
