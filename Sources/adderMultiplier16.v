@@ -5,6 +5,7 @@
  * File        : adderMultiplier16.v                     *
  * Author      : Yigit Suoglu                            *
  * Last Edit   : 20/05/2021                              *
+ * Licence     : CERN-OHL-W                              *
  * ----------------------------------------------------- *
  * Description : Modules for addition and multiplication *
  *               of 16 bit unsigned fixed point and      *
