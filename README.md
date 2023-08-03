@@ -10,6 +10,7 @@
 6. Helper Script
 7. Status
 8. Issues
+9. Licence
 
 [![Repo on GitLab](https://img.shields.io/badge/repo-GitLab-6C488A.svg)](https://gitlab.com/suoglu/Fixed-Floating-Point-Adder-Multiplier)
 [![Repo on GitHub](https://img.shields.io/badge/repo-GitHub-3D76C2.svg)](https://github.com/suoglu/Fixed-Floating-Point-Adder-Multiplier)
@@ -185,3 +186,7 @@ Helper python 3 scripts are added to help verfication. They can be found at [Scr
 ## Issues
 
 * Minor bug in floating multiplier module. Some of the results incorrect. See [issue](https://gitlab.com/suoglu/Fixed-Floating-Point-Adder-Multiplier/-/issues/4) #4.
+
+## Licence
+
+CERN Open Hardware Licence Version 2 - Weakly Reciprocal
